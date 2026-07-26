@@ -1,0 +1,141 @@
+[
+  {
+    "username": "sree",
+    "recipeTitle": "Sree's Special Hyderabadi Chicken Biryani 🍛",
+    "caption": "My family's authentic Hyderabadi secret dum chicken biryani! Slow-cooked to perfection with fragrant basmati rice, saffron, and homemade spices.",
+    "imageOrVideoUrl": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80",
+    "category": "Main Course",
+    "prepTime": "50 mins",
+    "ingredients": [
+      "1kg Aged Long-grain Basmati Rice",
+      "1kg Fresh Chicken chunks",
+      "2 cups Thick Curd (Yogurt)",
+      "Fried Onions (Birista)",
+      "Saffron milk & Cardamom powder",
+      "Whole spices (Star anise, shahi jeera, cloves)"
+    ],
+    "instructions": [
+      "Marinate chicken with yogurt, ginger-garlic paste, chili powder, and birista for at least 2 hours.",
+      "Parboil basmati rice with whole spices until 70% cooked.",
+      "Layer marinated chicken at the bottom of the pot, top with parboiled rice, saffron milk, ghee, and fried onions.",
+      "Seal the pot rim with dough/foil and cook on dum for 40 mins (10 mins medium heat, 30 mins low heat)."
+    ],
+    "chefTip": "💡 Secret Tip: Never stir biryani with a sharp spoon; scoop gently from the sides using a flat plate so the long rice grains don't break!",
+    "likes": 248,
+    "likedBy": [],
+    "comments": [
+      {
+        "username": "Navya",
+        "text": "This looks absolutely mouthwatering, Sree! Can you share the exact brand of basmati rice you used? 🔥"
+      },
+      {
+        "username": "arjun_cooks",
+        "text": "That saffron aroma recommendation is spot on!"
+      }
+    ],
+    "_id": "1se88ijmrxc8ivn",
+    "createdAt": "2026-07-23T09:57:50.099Z"
+  },
+  {
+    "username": "Navya",
+    "recipeTitle": "Authentic Creamy Garlic Fettuccine Alfredo 🍝",
+    "caption": "Zero shortcuts! Fresh pasta tossed in a creamy garlic butter sauce with plenty of grated Parmigiano-Reggiano and black pepper.",
+    "imageOrVideoUrl": "https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=800&auto=format&fit=crop&q=80",
+    "category": "Italian",
+    "prepTime": "20 mins",
+    "ingredients": [
+      "400g Fresh Fettuccine pasta",
+      "150g Aged Parmigiano-Reggiano (finely grated)",
+      "100g Unsalted Butter",
+      "4 cloves Garlic (minced)",
+      "Fresh Cracked Black Pepper",
+      "1 cup Reserved Pasta Starch Water"
+    ],
+    "instructions": [
+      "Boil fettuccine in salted water until 1 minute before al dente.",
+      "Melt butter in a pan on ultra-low heat with minced garlic until fragrant.",
+      "Transfer pasta directly to the pan with 1/2 cup hot pasta water.",
+      "Remove from heat, shower in grated Parmigiano, and vigorously toss until a silky sauce forms."
+    ],
+    "chefTip": "💡 Secret Tip: Always remove the pan from direct heat before adding cheese, otherwise the protein in cheese separates into clumps!",
+    "likes": 182,
+    "likedBy": [],
+    "comments": [
+      {
+        "username": "sree",
+        "text": "This is my go-to comfort food! Love the garlic addition."
+      }
+    ],
+    "_id": "imfgt2dmrxc8ivn",
+    "createdAt": "2026-07-23T09:57:50.099Z"
+  },
+  {
+    "username": "sree",
+    "recipeTitle": "Pillowy Soft Paneer Butter Masala 🧀",
+    "caption": "Restaurant style rich tomato gravy with soft paneer cubes. The trick is soaking paneer in warm water first so it stays melt-in-the-mouth soft!",
+    "imageOrVideoUrl": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=800&auto=format&fit=crop&q=80",
+    "category": "North Indian",
+    "prepTime": "25 mins",
+    "ingredients": [
+      "300g Fresh Paneer Cubes",
+      "4 Ripe Tomatoes (puréed)",
+      "2 Onions (finely chopped)",
+      "2 tbsp Kasuri Methi (crushed)",
+      "3 tbsp Butter & 1 tbsp Oil",
+      "Fresh Cream & Garam Masala"
+    ],
+    "instructions": [
+      "Soak paneer cubes in lukewarm salted water for 10 minutes to make them melt-in-mouth soft.",
+      "Sauté onions until deep golden, add ginger-garlic paste and spices.",
+      "Pour tomato puree and cook until butter separates from sides.",
+      "Add paneer cubes, heavy cream, and roasted kasuri methi. Simmer for 5 minutes."
+    ],
+    "chefTip": "💡 Secret Tip: Rub kasuri methi between your palms before sprinkling to unlock essential fragrant oils!",
+    "likes": 310,
+    "likedBy": [],
+    "comments": [
+      {
+        "username": "Navya",
+        "text": "Perfect paneer texture! Tried this today."
+      }
+    ],
+    "_id": "mcluc0pmrxc8ivn",
+    "createdAt": "2026-07-23T09:57:50.099Z"
+  },
+  {
+    "username": "sree",
+    "recipeTitle": "Grandma's Crispy Masala Vada",
+    "caption": "Every rainy evening at my grandmother's house meant a plate of hot vada and filter coffee. She never measured anything, but somehow they came out perfect every single time.",
+    "imageOrVideoUrl": "https://myfoodstory.com/wp-content/uploads/2021/05/Masala-Vada-3.jpg",
+    "category": "Snacks / Starters",
+    "prepTime": "50 mins",
+    "ingredients": [
+      "1 cup chana dal, soaked 3 hours",
+      "2 green chillies, chopped",
+      "1 inch ginger, chopped",
+      "1 small onion, finely chopped",
+      "2 tbsp curry leaves, chopped",
+      "1 tbsp coriander leaves, chopped",
+      "1/2 tsp fennel seeds",
+      "A pinch of asafoetida",
+      "Salt to taste",
+      "Oil for deep frying"
+    ],
+    "instructions": [
+      "1. Drain soaked chana dal completely and pat dry",
+      "2. Coarsely grind dal without adding water, keeping it slightly grainy",
+      "3. Transfer to a bowl and mix in onion, chillies, ginger, curry leaves, coriander leaves",
+      "4. Add fennel seeds, asafoetida, and salt, mix well",
+      "5. Shape mixture into small flat patties",
+      "6. Heat oil on medium flame until hot",
+      "7. Fry vadas in batches until golden brown and crisp on both sides",
+      "8. Drain on paper towels and serve hot"
+    ],
+    "chefTip": "Secret Tip: Don't over-grind the dal — a coarse texture is what gives the vada its signature crunch.",
+    "likes": 0,
+    "comments": [],
+    "_id": "deimz57mrxdsoiu",
+    "createdAt": "2026-07-23T10:41:30.150Z",
+    "likedBy": []
+  }
+]

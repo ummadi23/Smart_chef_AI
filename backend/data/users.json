@@ -1,0 +1,265 @@
+[
+  {
+    "username": "testchef",
+    "email": "testchef@example.com",
+    "password": "$2b$10$cY/2CgAMlwAwlu/rbO9kQuqdjrS6mnWC79U3qyUdpHlz87.aomhr.",
+    "_id": "adu4fromrxabj6y",
+    "createdAt": "2026-07-23T09:04:11.242Z"
+  },
+  {
+    "username": "Navya",
+    "email": "navya",
+    "password": "$2b$10$3YKNH/s8J9nE2sUu1eSoj.dOQl.6UYXI3FEySySaQBp8s361oXhK2",
+    "_id": "c92bobamrxbj5lf",
+    "createdAt": "2026-07-23T09:38:06.483Z"
+  },
+  {
+    "username": "usha",
+    "email": "usha",
+    "password": "$2b$10$jgdl8LnRQDD2FQUiFk3qie341rBeRse9vLz3C/Js1/T.OACu753Mu",
+    "_id": "niezjbrmrxdm6gw",
+    "createdAt": "2026-07-23T10:36:26.816Z",
+    "preferences": {
+      "groupSize": "2",
+      "goals": [
+        "impress",
+        "cook_faster",
+        "reduce_waste",
+        "learn_recipes"
+      ],
+      "cookingSkill": "beginner",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "vegetarian"
+      ],
+      "allergies": [
+        "nuts"
+      ],
+      "onboardingComplete": true
+    }
+  },
+  {
+    "username": "dasarinavyasree936@gmail.com",
+    "email": "dasarinavyasree936@gmail.com",
+    "password": "$2b$10$GiWfqvHL5ct8Oq.mAtWfRuUYI1Ypqj/TIdNCp3lvXmb1hxcTRs8N2",
+    "_id": "ud4ed94mrylp5bd",
+    "createdAt": "2026-07-24T07:10:28.393Z"
+  },
+  {
+    "username": "Google Chef",
+    "email": "google.chef@example.com",
+    "password": "$2b$10$LrdOtfWSCG0MADQIssT/F.HjVZWRcpbze.foJO/jSpz8ENkYIkJBO",
+    "googleId": "google_user_99",
+    "preferences": {
+      "onboardingComplete": false
+    },
+    "_id": "dyeqywomrynujjd",
+    "createdAt": "2026-07-24T08:10:39.337Z"
+  },
+  {
+    "username": "ummadiushasree2006@gmail.com",
+    "email": "ummadiushasree2006@gmail.com",
+    "password": "$2b$10$JMTgL820Gb821Fagi9Cmq.x11VG6QOd2q6gJu4fOWPDnBSB8nMkRa",
+    "googleId": "google_1784881209888",
+    "preferences": {
+      "onboardingComplete": true,
+      "groupSize": "2",
+      "goals": [
+        "reduce_waste",
+        "healthier",
+        "save_money",
+        "learn_recipes",
+        "cook_faster",
+        "impress"
+      ],
+      "cookingSkill": "beginner",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "pescatarian"
+      ],
+      "allergies": [
+        "mollusks"
+      ]
+    },
+    "_id": "iaw1hwmmryo6ron",
+    "createdAt": "2026-07-24T08:20:09.767Z"
+  },
+  {
+    "username": "Google Chef",
+    "email": "chef.google@example.com",
+    "password": "$2b$10$JO6ffviiQGriwJXDtQ8AW.XLUCD0Zz38k3vp.JV55eayLKCvxpOpu",
+    "googleId": "google_1784882149741",
+    "preferences": {
+      "onboardingComplete": true,
+      "groupSize": "1",
+      "goals": [
+        "reduce_waste"
+      ],
+      "cookingSkill": "intermediate",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "kosher"
+      ],
+      "allergies": [
+        "fish",
+        "soy"
+      ]
+    },
+    "_id": "bzy4iavmryoqwtl",
+    "createdAt": "2026-07-24T08:35:49.545Z"
+  },
+  {
+    "username": "Navyasree",
+    "email": "dasarinavyasree06@gmail.com",
+    "password": "$2b$10$WM5je08IDKqFFtopZRIFi.vqcT2xWY43Wr8CdNWuHz0rABqZdoSFK",
+    "preferences": {
+      "groupSize": "2",
+      "goals": [
+        "reduce_waste",
+        "healthier",
+        "save_money",
+        "learn_recipes",
+        "cook_faster",
+        "impress"
+      ],
+      "cookingSkill": "beginner",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "pescatarian"
+      ],
+      "allergies": [
+        "mollusks"
+      ],
+      "onboardingComplete": true
+    },
+    "_id": "zjynpdcmrzw9sxu",
+    "createdAt": "2026-07-25T04:54:14.466Z"
+  },
+  {
+    "username": "Sree",
+    "email": "ummadiushasree2@gmail.com",
+    "password": "$2b$10$RS5VPMWD7njVJ./54i8cQeLkHB5S7ehk49KQbtGKlknnDZHn6vkJ2",
+    "preferences": {
+      "groupSize": "2",
+      "goals": [
+        "reduce_waste",
+        "healthier",
+        "save_money",
+        "learn_recipes",
+        "cook_faster",
+        "impress"
+      ],
+      "cookingSkill": "beginner",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "pescatarian"
+      ],
+      "allergies": [
+        "mollusks"
+      ],
+      "onboardingComplete": true
+    },
+    "_id": "lh41rn3mrzwof4r",
+    "createdAt": "2026-07-25T05:05:36.411Z"
+  },
+  {
+    "username": "Ummadi",
+    "email": "ushasree2006@gmail.com",
+    "password": "$2b$10$h3A7fA..xSe4/AL2SzP6MOb.lT4IMagiM4B.cI.A/5pIRpLVY470u",
+    "preferences": {
+      "groupSize": "3-4",
+      "goals": [
+        "reduce_waste",
+        "healthier",
+        "save_money",
+        "learn_recipes",
+        "cook_faster",
+        "impress"
+      ],
+      "cookingSkill": "intermediate",
+      "cuisines": [
+        "indian"
+      ],
+      "dietaryNeeds": [
+        "pescatarian",
+        "egg_free"
+      ],
+      "allergies": [],
+      "onboardingComplete": true
+    },
+    "_id": "9layww0mrzwtqma",
+    "createdAt": "2026-07-25T05:09:44.578Z"
+  },
+  {
+    "username": "Alex Rivera",
+    "email": "alex.rivera.chef@gmail.com",
+    "password": "$2b$10$MKgi8MyDnaUXJVHvKKTJju4CymqUyBM88aeC5j2jqV1rKQFqWoBli",
+    "googleId": "google_1",
+    "preferences": {
+      "onboardingComplete": true,
+      "groupSize": "5+",
+      "goals": [
+        "learn_recipes",
+        "healthier",
+        "impress"
+      ],
+      "cookingSkill": "advanced",
+      "cuisines": [
+        "greek"
+      ],
+      "dietaryNeeds": [],
+      "allergies": []
+    },
+    "_id": "qe7840cms03h5yb",
+    "createdAt": "2026-07-25T08:15:55.235Z"
+  },
+  {
+    "username": "Sarah Chen",
+    "email": "sarah.cooks@gmail.com",
+    "password": "$2b$10$RUgp1N7zIMrw8QcmqbNjmewt4ZYQEJkm1YQuj4dYi3nAPTJ4e4e9m",
+    "googleId": "google_2",
+    "preferences": {
+      "onboardingComplete": false
+    },
+    "_id": "5gn4mlvms05bd9q",
+    "createdAt": "2026-07-25T09:07:24.014Z"
+  },
+  {
+    "username": "Ushasree Ummadi",
+    "email": "ummadiushasree06@gmail.com",
+    "password": "$2b$10$kmR9phDYbO6zV.9f1jxstu6oCVwJ.2DoGzp3/C2DTlR7pGAZ/d/cq",
+    "googleId": "google_user_2",
+    "preferences": {
+      "onboardingComplete": true,
+      "groupSize": "3-4",
+      "goals": [
+        "save_money",
+        "healthier",
+        "impress"
+      ],
+      "cookingSkill": "intermediate",
+      "cuisines": [
+        "indian",
+        "eastern_european"
+      ],
+      "dietaryNeeds": [
+        "vegetarian"
+      ],
+      "allergies": [
+        "peanuts"
+      ]
+    },
+    "_id": "wmylikems07mvf9",
+    "createdAt": "2026-07-25T10:12:19.989Z"
+  }
+]
