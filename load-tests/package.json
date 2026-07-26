@@ -1,0 +1,8 @@
+{
+  "name": "smart-chef-load-tests",
+  "version": "1.0.0",
+  "description": "Concurrent Load & Stress Testing Suite for Smart Chef AI",
+  "scripts": {
+    "test": "python run_load_tests.py"
+  }
+}

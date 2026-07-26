@@ -1,0 +1,79 @@
+name: End-to-End & API Tests (Selenium, Appium, API, Load)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-all-test-suites:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: 🐍 Setup Python 3.10 Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 🌐 Install Chrome, ChromeDriver & Python Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          pip install pandas openpyxl requests selenium
+
+      - name: 📦 Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: 🚀 Start Backend Server in Background
+        run: |
+          cd backend
+          node index.js &
+          sleep 5
+
+      - name: 📦 Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: 🧪 Run 1. Selenium Web E2E Automation Tests
+        run: |
+          python run_selenium_300_tests.py
+
+      - name: 📱 Run 2. Appium Mobile E2E Automation Tests
+        run: |
+          python mobile-appium-tests/run_appium_tests.py
+
+      - name: ⚡ Run 3. REST API Automation Tests
+        run: |
+          python api-tests/run_api_tests.py
+
+      - name: 🔥 Run 4. Concurrent Load & Stress Tests
+        run: |
+          python load-tests/run_load_tests.py
+
+      - name: 🏗️ Build Frontend Web Production Bundle
+        run: |
+          cd frontend
+          npx expo export -p web
+
+      - name: 🚀 Deploy to GitHub Pages (gh-pages)
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
