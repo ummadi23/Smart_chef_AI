@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "956976912121",
+    "project_id": "smart-chef-ai-2ad41",
+    "storage_bucket": "smart-chef-ai-2ad41.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956976912121:android:325731bb134e9a2a9e7428",
+        "android_client_info": {
+          "package_name": "com.smartchef.cookmateai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "956976912121-v8uhhknvqa8iho2kaqntvfc2nh8vggbp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOd2M5mZTXc6oQRhcsWhDv5C21PmYwOOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "956976912121-v8uhhknvqa8iho2kaqntvfc2nh8vggbp.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

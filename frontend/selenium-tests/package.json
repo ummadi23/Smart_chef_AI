@@ -1,0 +1,13 @@
+{
+  "name": "smart-chef-selenium-tests",
+  "version": "1.0.0",
+  "description": "Selenium E2E Automated Web Tests for Smart Chef AI",
+  "main": "tests/login.test.js",
+  "scripts": {
+    "test": "mocha tests/login.test.js --timeout 60000"
+  },
+  "dependencies": {
+    "mocha": "^11.7.6",
+    "selenium-webdriver": "^4.46.0"
+  }
+}
