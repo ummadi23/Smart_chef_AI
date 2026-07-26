@@ -664,7 +664,8 @@ target_save_file = EXCEL_REPORT_FILE
 try:
     wb.save(target_save_file)
 except PermissionError:
-    target_save_file = "Smart_Chef_AI_300_Test_Execution_Report_Updated.xlsx"
+    timestamp_suffix = int(time.time())
+    target_save_file = f"Smart_Chef_AI_300_Test_Execution_Report_{timestamp_suffix}.xlsx"
     wb.save(target_save_file)
 
 print(f"🎉 EXCEL TEST REPORT GENERATED SUCCESSFULLY: '{os.path.abspath(target_save_file)}'!")
