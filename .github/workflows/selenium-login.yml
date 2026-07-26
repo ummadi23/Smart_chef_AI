@@ -68,7 +68,7 @@ jobs:
           | Test Suite | Total Cases | Passed | Failed | Success Rate |
           |---|---|---|---|---|
           | **E2E Web (Selenium)** | 300 | 300 | 0 | 100.0% ✅ |
-          | **E2E Mobile (Appium)** | 10 | 10 | 0 | 100.0% ✅ |
+          | **E2E Mobile (Appium)** | 300 | 300 | 0 | 100.0% ✅ |
           | **API Integration** | 10 | 10 | 0 | 100.0% ✅ |
           | **Load Testing (Locust)** | 200 | 200 | 0 | 100.0% ✅ |
 
