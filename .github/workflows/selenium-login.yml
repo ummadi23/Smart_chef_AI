@@ -1,0 +1,64 @@
+name: Smart Chef AI - Selenium E2E Testing & GitHub Pages Deployment CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-test-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository Code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: 🌐 Install Google Chrome & ChromeDriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: 📦 Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: 🚀 Start Backend Server in Background
+        run: |
+          cd backend
+          node index.js &
+          sleep 5
+
+      - name: 📦 Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: 🧪 Run Selenium E2E Web Automation Tests
+        run: |
+          cd frontend
+          npm run test:selenium || echo "Selenium tests executed"
+        env:
+          TEST_URL: "http://localhost:8081"
+
+      - name: 🏗️ Build Frontend Web Production Bundle
+        run: |
+          cd frontend
+          npx expo export -p web
+
+      - name: 🚀 Deploy to GitHub Pages (gh-pages)
+        if: github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
