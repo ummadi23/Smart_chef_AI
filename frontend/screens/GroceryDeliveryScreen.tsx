@@ -132,6 +132,20 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
           })}
         </ScrollView>
 
+        {/* Payment & COD Troubleshooting Tip Card */}
+        <View style={styles.paymentNoticeCard}>
+          <Text style={styles.noticeHeading}>💡 Cash on Delivery (COD) & Payment Help</Text>
+          <Text style={styles.noticeText}>
+            • <Text style={styles.boldText}>Why is "Cash" grayed out?</Text> Platforms like Blinkit, Zepto, Swiggy Instamart & BigBasket allow <Text style={styles.boldText}>only 1 active COD order at a time</Text>. If an existing cash order is pending delivery, COD is automatically locked.
+          </Text>
+          <Text style={styles.noticeText}>
+            • <Text style={styles.boldText}>Instant Workarounds:</Text>
+            {"\n"}  1. Pay via <Text style={styles.highlightText}>UPI (GPay / PhonePe / Paytm)</Text> or Cards for 1-click order placement.
+            {"\n"}  2. Switch to another app below (e.g., try <Text style={styles.highlightText}>Zepto, Swiggy Instamart, or BigBasket</Text> if Blinkit COD is blocked).
+            {"\n"}  3. Use <Text style={styles.highlightText}>Pay Later (Simpl / LazyPay)</Text> for post-delivery payment.
+          </Text>
+        </View>
+
         {/* Platform Store Cards */}
         <Text style={styles.sectionHeading}>
           Select Delivery Platform {searchItem ? `for "${searchItem}"` : ''}
@@ -151,6 +165,12 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
                   <Text style={[styles.storeName, { color: store.accent }]}>{store.name}</Text>
                   <Text style={styles.storeTagline}>{store.tagline}</Text>
                 </View>
+              </View>
+
+              <View style={styles.paymentMethodsRow}>
+                <Text style={styles.paymentTag}>💳 UPI / Cards</Text>
+                <Text style={styles.paymentTag}>💵 COD Allowed</Text>
+                <Text style={styles.paymentTag}>⚡ Pay Later</Text>
               </View>
 
               <View style={[styles.orderActionBtn, { backgroundColor: store.accent }]}>
@@ -237,11 +257,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
   },
-  storeHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 14 },
+  storeHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
   storeIcon: { fontSize: 32, marginRight: 14 },
   storeInfo: { flex: 1 },
   storeName: { fontSize: 18, fontWeight: '900', marginBottom: 2 },
   storeTagline: { color: '#CBD5E1', fontSize: 12, fontWeight: '600' },
+
+  paymentNoticeCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#3B82F644',
+  },
+  noticeHeading: { color: '#60A5FA', fontSize: 14, fontWeight: '800', marginBottom: 8 },
+  noticeText: { color: '#CBD5E1', fontSize: 12, lineHeight: 18, marginBottom: 6 },
+  boldText: { fontWeight: '800', color: '#F8FAFC' },
+  highlightText: { color: '#38BDF8', fontWeight: '700' },
+
+  paymentMethodsRow: { flexDirection: 'row', gap: 6, marginBottom: 14, flexWrap: 'wrap' },
+  paymentTag: { backgroundColor: '#ffffff22', color: '#F8FAFC', fontSize: 10, fontWeight: '700', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
 
   orderActionBtn: {
     borderRadius: 12,
