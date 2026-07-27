@@ -301,7 +301,6 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
                 <View style={styles.ingredientsGrid}>
                   {analysisResult.ingredients.map((ing, idx) => (
                     <View key={idx} style={styles.ingredientCard}>
-                      {ing.image && <Image source={{ uri: ing.image }} style={styles.ingredientImage} />}
                       <View style={styles.ingredientInfo}>
                         <Text style={styles.ingredientNameText}>{ing.name}</Text>
                         <View style={styles.quantityBadge}>

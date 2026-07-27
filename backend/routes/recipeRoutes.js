@@ -1327,10 +1327,9 @@ router.post('/analyze-youtube', async (req, res) => {
     const lowerTitle = videoTitle.toLowerCase();
     const cleanTitle = videoTitle.replace(/recipe|how to make|in telugu|in hindi|in english|easy|quick|style|special|secret|village|home made/gi, '').trim();
 
-    const ing = (name, nameTe, qty, qtyTe, searchKw) => ({
+    const ing = (name, nameTe, qty, qtyTe) => ({
       name: isTelugu ? `${nameTe} (${name})` : name,
-      quantity: isTelugu ? qtyTe : qty,
-      image: getIngredientImage(searchKw || name)
+      quantity: isTelugu ? qtyTe : qty
     });
 
     // 1. Ragi Laddu / Millet Sweets / Energy Balls / Laddus
