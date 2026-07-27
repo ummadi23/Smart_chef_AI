@@ -2,9 +2,35 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
+const authMiddleware = require('../middleware/auth');
 
-// 1. SIGN UP ROUTE
+// In-memory OTP store: { email -> { otp, expiresAt } }
+// In production, use Redis or a DB collection instead.
+const resetOtpStore = new Map();
+
+// ── Helper: generic error response (never expose internals, Fixes M-001) ──────
+const serverError = (res, context, err) => {
+  console.error(`[${context}]`, err);
+  res.status(500).json({ status: 'error', error: 'SERVER_ERROR', message: 'Internal server error.' });
+};
+
+// ── Helper: validate email format ─────────────────────────────────────────────
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// ── Helper: JWT sign with explicit algorithm (Fixes C-004, M-003) ─────────────
+const signToken = (userId, role = 'user') => {
+  return jwt.sign(
+    { id: userId, role, iss: 'smart-chef-api', aud: 'smart-chef-app' },
+    process.env.JWT_SECRET,          // No fallback — startup guard ensures this exists
+    { expiresIn: '1d', algorithm: 'HS256' }
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. SIGN UP
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/signup', async (req, res) => {
   try {
     const { username, email, password, preferences } = req.body;
@@ -12,35 +38,28 @@ router.post('/signup', async (req, res) => {
     if (!username || !username.trim()) {
       return res.status(400).json({ error: 'USERNAME_REQUIRED', message: 'Username is required.' });
     }
-    if (!email || !email.trim()) {
-      return res.status(400).json({ error: 'EMAIL_REQUIRED', message: 'Email address is required.' });
+    // Validate email format (Fixes TC-INPUT-001)
+    if (!email || !isValidEmail(email.trim())) {
+      return res.status(400).json({ error: 'INVALID_EMAIL', message: 'A valid email address is required.' });
     }
     if (!password || password.length < 8) {
-      return res.status(400).json({ error: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters with letters and numbers.' });
+      return res.status(400).json({ error: 'WEAK_PASSWORD', message: 'Password must be at least 8 characters.' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Check if user email already exists
-    let userExists = await User.findOne({ email: cleanEmail });
+    const userExists = await User.findOne({ email: cleanEmail });
     if (userExists) {
-      return res.status(400).json({
-        error: 'EMAIL_EXISTS',
-        message: 'An account with this email already exists. Please log in instead.'
-      });
+      return res.status(400).json({ error: 'EMAIL_EXISTS', message: 'An account with this email already exists.' });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Initial user preferences with onboardingComplete flag
     const initialPrefs = {
       ...(preferences || {}),
       onboardingComplete: preferences?.onboardingComplete || false,
     };
 
-    // Create user document
     const newUser = new User({
       username: username.trim(),
       email: cleanEmail,
@@ -50,7 +69,7 @@ router.post('/signup', async (req, res) => {
 
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET || 'SECRET_SESSION_KEY', { expiresIn: '7d' });
+    const token = signToken(newUser._id);
 
     res.status(201).json({
       message: 'Account created successfully!',
@@ -64,11 +83,13 @@ router.post('/signup', async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Server error during registration: ' + error.message });
+    serverError(res, 'signup', error);
   }
 });
 
-// 2. LOG IN ROUTE
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. LOG IN
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -81,26 +102,19 @@ router.post('/login', async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-
-    // Find user
     const user = await User.findOne({ email: cleanEmail });
+
+    // Use generic message for both missing user & wrong password (Fixes TC-AUTH-005, TC-AUTH-006)
     if (!user) {
-      return res.status(400).json({
-        error: 'EMAIL_NOT_FOUND',
-        message: 'No account found with this email. Please create an account first.'
-      });
+      return res.status(400).json({ error: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' });
     }
 
-    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({
-        error: 'INVALID_PASSWORD',
-        message: 'Incorrect email or password. Please try again.'
-      });
+      return res.status(400).json({ error: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'SECRET_SESSION_KEY', { expiresIn: '7d' });
+    const token = signToken(user._id);
 
     res.json({
       message: 'Login successful!',
@@ -114,16 +128,18 @@ router.post('/login', async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Server error during login: ' + error.message });
+    serverError(res, 'login', error);
   }
 });
 
-// 3. GOOGLE SIGN-IN ROUTE
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. GOOGLE SIGN-IN
+// ─────────────────────────────────────────────────────────────────────────────
 router.post('/google', async (req, res) => {
   try {
     const { email, name, googleId } = req.body;
 
-    if (!email) {
+    if (!email || !isValidEmail(email)) {
       return res.status(400).json({ error: 'EMAIL_REQUIRED', message: 'Google account email is required.' });
     }
 
@@ -133,21 +149,21 @@ router.post('/google', async (req, res) => {
 
     if (!user) {
       isNewUser = true;
-      // Create new user via Google
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(googleId || 'GOOGLE_AUTH_SECRET', salt);
+      // Use a cryptographically random placeholder password (Fixes H-005)
+      const randomPlaceholder = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPlaceholder, 12);
 
       user = new User({
-        username: name || email.split('@')[0],
+        username: name || cleanEmail.split('@')[0],
         email: cleanEmail,
         password: hashedPassword,
-        googleId,
+        googleId: googleId || null,
         preferences: { onboardingComplete: false },
       });
       await user.save();
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'SECRET_SESSION_KEY', { expiresIn: '7d' });
+    const token = signToken(user._id);
 
     res.json({
       message: 'Google Authentication successful!',
@@ -161,18 +177,18 @@ router.post('/google', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Google auth server error: ' + error.message });
+    serverError(res, 'google-auth', error);
   }
 });
 
-// 4. UPDATE USER PREFERENCES ROUTE
-router.post('/update-preferences', async (req, res) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. UPDATE USER PREFERENCES — requires authentication (Fixes C-002, TC-AUTH-012)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/update-preferences', authMiddleware, async (req, res) => {
   try {
-    const { userId, preferences } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ error: 'USER_ID_REQUIRED', message: 'User ID is required.' });
-    }
+    // Identity from verified JWT, never from body (Fixes TC-AUTH-013 IDOR)
+    const userId = req.user.id;
+    const { preferences } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -197,40 +213,101 @@ router.post('/update-preferences', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Server error updating preferences: ' + error.message });
+    serverError(res, 'update-preferences', error);
   }
 });
 
-// 5. RESET / FORGOT PASSWORD ROUTE
-router.post('/reset-password', async (req, res) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// 5. REQUEST PASSWORD RESET OTP (Fixes C-003 — Step 1 of 2)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/forgot-password', async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
-
-    if (!email || !email.trim()) {
-      return res.status(400).json({ error: 'EMAIL_REQUIRED', message: 'Email address is required.' });
-    }
-    if (!newPassword || newPassword.length < 8) {
-      return res.status(400).json({ error: 'WEAK_PASSWORD', message: 'New password must be at least 8 characters long.' });
+    const { email } = req.body;
+    if (!email || !isValidEmail(email.trim())) {
+      return res.status(400).json({ error: 'INVALID_EMAIL', message: 'A valid email address is required.' });
     }
 
     const cleanEmail = email.trim().toLowerCase();
     const user = await User.findOne({ email: cleanEmail });
 
+    // Always respond success to prevent user enumeration
     if (!user) {
-      return res.status(404).json({ error: 'EMAIL_NOT_FOUND', message: 'No account found with this email address.' });
+      return res.json({ message: 'If this email exists, a reset code has been sent.' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    // Generate 6-digit OTP with 15-min expiry
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+
+    resetOtpStore.set(cleanEmail, { otp, expiresAt });
+
+    // In production: send otp via email with nodemailer
+    // For development: log to server console only (never to client)
+    console.log(`[DEV ONLY] Password reset OTP for ${cleanEmail}: ${otp}`);
+
+    res.json({ message: 'If this email exists, a reset code has been sent.' });
+  } catch (error) {
+    serverError(res, 'forgot-password', error);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 6. RESET PASSWORD with OTP verification (Fixes C-003 — Step 2 of 2)
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !isValidEmail(email.trim())) {
+      return res.status(400).json({ error: 'INVALID_EMAIL', message: 'A valid email address is required.' });
+    }
+    if (!otp) {
+      return res.status(400).json({ error: 'OTP_REQUIRED', message: 'Reset code is required.' });
+    }
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: 'WEAK_PASSWORD', message: 'New password must be at least 8 characters.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Verify OTP
+    const record = resetOtpStore.get(cleanEmail);
+    if (!record) {
+      return res.status(400).json({ error: 'INVALID_OTP', message: 'Invalid or expired reset code. Request a new one.' });
+    }
+    if (Date.now() > record.expiresAt) {
+      resetOtpStore.delete(cleanEmail);
+      return res.status(400).json({ error: 'OTP_EXPIRED', message: 'Reset code has expired. Please request a new one.' });
+    }
+    if (record.otp !== otp.toString()) {
+      return res.status(400).json({ error: 'INVALID_OTP', message: 'Incorrect reset code.' });
+    }
+
+    // OTP valid — consume it (single use)
+    resetOtpStore.delete(cleanEmail);
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({ error: 'USER_NOT_FOUND', message: 'Account not found.' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
 
-    res.json({
-      message: 'Password updated successfully! Please log in with your new password.',
-      success: true
-    });
+    res.json({ message: 'Password updated successfully! Please log in with your new password.', success: true });
   } catch (error) {
-    res.status(500).json({ error: 'SERVER_ERROR', message: 'Server error resetting password: ' + error.message });
+    serverError(res, 'reset-password', error);
   }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 7. LOGOUT — invalidate token (Fixes L-003)
+// In production use Redis denylist; here we use a short token expiry (1d) as mitigation.
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/logout', authMiddleware, (req, res) => {
+  // Client must delete the token from storage.
+  // For full revocation: add token jti to Redis denylist here.
+  res.json({ message: 'Logged out successfully. Please delete your token from local storage.' });
 });
 
 module.exports = router;

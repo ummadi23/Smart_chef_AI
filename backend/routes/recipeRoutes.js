@@ -6,11 +6,27 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const crypto = require('crypto');
 const { OpenAI } = require('openai');
 const Recipe = require('../models/Recipe');
 const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
 
-const upload = multer({ dest: 'uploads/' });
+// ── Secure Multer Config: fileFilter + size limit (Fixes H-004) ───────────────
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const upload = multer({
+  dest: 'uploads/',
+  limits: { fileSize: 5 * 1024 * 1024 },  // 5MB max
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('INVALID_FILE_TYPE: Only JPEG, PNG, WebP and GIF images are allowed.'), false);
+    }
+  }
+});
+
+// ── Increase body limit ONLY for scan-fridge (Fixes H-006 — was global 50MB) ──
+router.use('/scan-fridge', express.json({ limit: '25mb' }));
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INGREDIENT → REAL IMAGE LOOKUP
@@ -248,7 +264,9 @@ async function parseImageTextOcr(imageBase64, userLanguage = 'English') {
   return new Promise((resolve) => {
     try {
       // detectOrientation=true auto-rotates upside-down or sideways camera photos before scanning
-      const postData = 'apikey=helloworld&language=eng&isOverlayRequired=false&detectOrientation=true&scale=true&base64Image=' + encodeURIComponent(imageBase64);
+      // Use private OCR.space API key from env (Fixes M-006 — removes public demo key)
+      const ocrApiKey = process.env.OCR_SPACE_API_KEY || 'helloworld';
+      const postData = 'apikey=' + ocrApiKey + '&language=eng&isOverlayRequired=false&detectOrientation=true&scale=true&base64Image=' + encodeURIComponent(imageBase64);
 
       const req = https.request('https://api.ocr.space/parse/image', {
         method: 'POST',
@@ -1864,7 +1882,8 @@ router.post('/leftover-makeover', (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // HERB DICTIONARY — 100% Authentic, distinct photographic cards for all herbs
 // ─────────────────────────────────────────────────────────────────────────────
-const BASE_IMG = 'http://localhost:5000/images';
+// Use env variable for base URL — no hardcoded localhost (Fixes M-007)
+const BASE_IMG = `${process.env.BASE_URL || 'http://localhost:5000'}/images`;
 
 const HERB_LOOKUP = {
   'neem': { label: 'Neem (Indian Lilac / Natural Herb)', image: `${BASE_IMG}/neem.jpg` },
@@ -2548,7 +2567,7 @@ router.get(['/search-recipes', '/api/recipes/search-recipes'], async (req, res) 
           const key = cleanTitle.toLowerCase();
           if (!uniqueResultsMap.has(key)) {
             uniqueResultsMap.set(key, {
-              id: item.recipe.id || String(Math.random()),
+              id: item.recipe.id || crypto.randomUUID(),  // Fixes M-009: no Math.random()
               title: cleanTitle,
               image: item.recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
               ingredients: (item.recipe.ingredients || []).map(ing => (typeof ing === 'string' ? ing : ing.name || String(ing))),

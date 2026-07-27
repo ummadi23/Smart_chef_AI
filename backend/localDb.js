@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid'); // Fixes M-009: use UUID instead of Math.random()
 
 const DATA_DIR = path.join(__dirname, 'data');
 if (!fs.existsSync(DATA_DIR)) {
@@ -50,7 +51,7 @@ class Collection {
     const instance = { ...objData };
 
     if (!instance._id) {
-      instance._id = Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+      instance._id = uuidv4(); // Cryptographically secure UUID (Fixes M-009)
     }
     if (!instance.createdAt) {
       instance.createdAt = new Date().toISOString();

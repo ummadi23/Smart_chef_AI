@@ -54,6 +54,8 @@ export default function AuthScreen({
   useEffect(() => {
     try {
       GoogleSignin.configure({
+        webClientId: '956976912121-v8uhhknvqa8iho2kaqntvfc2nh8vggbp.apps.googleusercontent.com',
+        offlineAccess: true,
         scopes: ['email', 'profile'],
       });
     } catch (e) {

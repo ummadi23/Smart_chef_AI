@@ -13,7 +13,7 @@ try {
   const googleSigninModule = require('@react-native-google-signin/google-signin');
   GoogleSignin = googleSigninModule.GoogleSignin;
   GoogleSignin.configure({
-    webClientId: '987654321098-webclientid.apps.googleusercontent.com',
+    webClientId: '956976912121-v8uhhknvqa8iho2kaqntvfc2nh8vggbp.apps.googleusercontent.com',
     offlineAccess: true,
   });
 } catch (e) {

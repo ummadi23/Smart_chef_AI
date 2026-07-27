@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider, signInWithCredential } from 'firebase/auth
 
 // Standard Firebase Configuration for CookMate AI
 const firebaseConfig = {
-  apiKey: "AIzaSyB-DemoSmartChefFirebaseConfigKey99",
-  authDomain: "cookmate-ai.firebaseapp.com",
-  projectId: "cookmate-ai",
-  storageBucket: "cookmate-ai.appspot.com",
-  messagingSenderId: "987654321098",
-  appId: "1:987654321098:web:a1b2c3d4e5f6g7h8"
+  apiKey: "AIzaSyAOd2M5mZTXc6oQRhcsWhDv5C21PmYwOOY",
+  authDomain: "smart-chef-ai-2ad41.firebaseapp.com",
+  projectId: "smart-chef-ai-2ad41",
+  storageBucket: "smart-chef-ai-2ad41.firebasestorage.app",
+  messagingSenderId: "956976912121",
+  appId: "1:956976912121:android:325731bb134e9a2a9e7428"
 };
 
 // Initialize Firebase App
