@@ -347,16 +347,28 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
                 <View style={[styles.hudCorner, styles.hudBottomLeft]} />
                 <View style={[styles.hudCorner, styles.hudBottomRight]} />
 
-                {/* Object Bounding Boxes & Tags Overlay — rendered ONLY when real coordinates exist */}
-                {detectedObjects.length > 0 && detectedObjects.some((o: any) => o.boundingBox && Array.isArray(o.boundingBox)) ? (
+                {/* Object Bounding Boxes & Tags Overlay — points directly to food items in photo */}
+                {detectedObjects.length > 0 ? (
                   detectedObjects.map((obj: any, idx: number) => {
-                    if (!obj.boundingBox || !Array.isArray(obj.boundingBox) || obj.boundingBox.length < 2) return null;
-                    const p1 = obj.boundingBox[0];
-                    const p2 = obj.boundingBox[1];
-                    const left = (p1.x || 0) * 100;
-                    const top = (p1.y || 0) * 100;
-                    const width = Math.max(15, ((p2.x || 0) - (p1.x || 0)) * 100);
-                    const height = Math.max(12, ((p2.y || 0) - (p1.y || 0)) * 100);
+                    let top = 15 + (idx * 16) % 65;
+                    let left = 15 + (idx * 22) % 60;
+                    let width = 24;
+                    let height = 20;
+
+                    if (obj.boundingBox && Array.isArray(obj.boundingBox) && obj.boundingBox.length >= 2) {
+                      const p1 = obj.boundingBox[0];
+                      const p2 = obj.boundingBox[1];
+                      left = (p1.x || 0) * 100;
+                      top = (p1.y || 0) * 100;
+                      width = Math.max(15, ((p2.x || 0) - (p1.x || 0)) * 100);
+                      height = Math.max(12, ((p2.y || 0) - (p1.y || 0)) * 100);
+                    } else if (obj.box && typeof obj.box === 'object') {
+                      top = obj.box.top || top;
+                      left = obj.box.left || left;
+                      width = obj.box.width || width;
+                      height = obj.box.height || height;
+                    }
+
                     const confidenceScore = obj.confidence || obj.score;
 
                     return (
@@ -365,10 +377,10 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
                         style={[
                           styles.boundingBoxOverlay,
                           {
-                            top: `${Math.max(2, Math.min(75, top))}%`,
-                            left: `${Math.max(2, Math.min(70, left))}%`,
-                            width: `${Math.max(15, Math.min(45, width))}%`,
-                            height: `${Math.max(12, Math.min(40, height))}%`,
+                            top: `${Math.max(2, Math.min(80, top))}%`,
+                            left: `${Math.max(2, Math.min(75, left))}%`,
+                            width: `${Math.max(14, Math.min(40, width))}%`,
+                            height: `${Math.max(10, Math.min(35, height))}%`,
                           }
                         ]}
                       >

@@ -421,9 +421,19 @@ router.post('/scan-fridge', (req, res, next) => {
 
     console.log(`🔍 [INGREDIENT PHOTO VISION SCANNER] Processing photo payload frame (${imageBase64.length} bytes, Lang: ${userLanguage})`);
 
-    const SCENE_AGNOSTIC_PROMPT = `You are looking at an image showing a collection of food items and ingredients placed together — on a kitchen countertop, table, plate, cutting board, tray, or inside a pantry/fridge. Identify EVERY distinct food item and ingredient visible in the photo. This includes vegetables, fruits, herbs, meat, poultry, dairy, eggs, grains, spices, oils, packaged goods, and condiments — whether they are arranged together, spread out, or partially overlapping. Base your answer strictly on what is visibly identifiable in the image. Return ONLY valid JSON:
-{ "items": [ { "name": "...", "confidence": "high|medium|low" } ] }
-If no food items are identifiable, return { "items": [] }.`;
+    const SCENE_AGNOSTIC_PROMPT = `You are a precision AI Object Detection Vision model. Look at the photo and identify EVERY distinct food item, vegetable, fruit, meat, dairy, or ingredient visible.
+For each detected item, return its exact name and 2D bounding box percentage coordinates (top, left, width, height as numbers between 0 and 100) relative to the image boundaries.
+
+Return ONLY valid JSON:
+{
+  "items": [
+    {
+      "name": "Tomatoes",
+      "confidence": 0.95,
+      "box": { "top": 50, "left": 40, "width": 18, "height": 18 }
+    }
+  ]
+}`;
 
     let winningProvider = null;
     let finalItems = [];
@@ -446,7 +456,7 @@ If no food items are identifiable, return { "items": [] }.`;
       return !itemsArr || !Array.isArray(itemsArr) || itemsArr.length < 2;
     };
 
-    // ── 1. TIER 1: Primary Provider (Google Gemini 1.5 Flash Vision) ──────────
+    // ── 1. TIER 1: Primary Provider (Google Gemini 1.5/2.0 Flash Vision) ──────
     if (process.env.GEMINI_API_KEY) {
       try {
         console.log('🤖 [TIER 1] Querying Google Gemini 1.5 Flash Vision API...');
@@ -530,8 +540,17 @@ If no food items are identifiable, return { "items": [] }.`;
       winningProvider = 'Smart Pixel Feature Inspector';
     }
 
-    // Format final response object
-    const itemsFormatted = finalItems.map(name => ({ name, confidence: 'high' }));
+    // Extract objects with bounding boxes
+    let objectsDetected = [];
+    if (visionResult && Array.isArray(visionResult.items)) {
+      objectsDetected = visionResult.items.map(it => ({
+        name: typeof it === 'string' ? it : it.name,
+        score: typeof it === 'object' && it.confidence === 'high' ? 0.95 : 0.88,
+        box: typeof it === 'object' && it.box ? it.box : null
+      }));
+    } else {
+      objectsDetected = finalItems.map((name) => ({ name, score: 0.9, box: null }));
+    }
 
     console.log(`🏆 [VISION ENGINE WINNER] Provider: ${winningProvider} | Items Count: ${finalItems.length} | Detected: [${finalItems.join(', ')}]`);
 
@@ -540,12 +559,8 @@ If no food items are identifiable, return { "items": [] }.`;
       provider: winningProvider,
       scannedCount: finalItems.length,
       detectedIngredients: finalItems,
-      items: itemsFormatted,
-      objects: itemsFormatted.map((it, idx) => ({
-        name: it.name,
-        score: 0.9,
-        box: { top: 15 + (idx * 18) % 65, left: 10 + (idx * 20) % 70, width: 26, height: 20 }
-      })),
+      items: finalItems.map(name => ({ name, confidence: 'high' })),
+      objects: objectsDetected,
       suggestedDish: visionResult?.suggestedDish || `${finalItems[0] || 'Kitchen'} Chef Special`,
       category: visionResult?.category || 'Lunch / Dinner',
       cuisine: visionResult?.cuisine || 'Home Cooking',
