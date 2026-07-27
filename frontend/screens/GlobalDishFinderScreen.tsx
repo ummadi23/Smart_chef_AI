@@ -35,11 +35,11 @@ export default function GlobalDishFinderScreen() {
         <SafeAreaView style={styles.safeContainer}>
             <View style={styles.mainContainer}>
                 <Text style={styles.appHeader}>🍲 Discover Global Recipes</Text>
-                <Text style={styles.subHeader}>Search any dish to find correct images, ingredients, and steps.</Text>
+                <Text style={styles.subHeader}>Search any dish to view ingredients and step-by-step cooking guide.</Text>
 
                 <View style={styles.searchSection}>
                     <TextInput
-                        placeholder="Search dish (e.g., Tacos, Sushi, Pasta...)"
+                        placeholder="Search dish (e.g., Paneer Butter Masala, Tacos, Pasta...)"
                         placeholderTextColor="#7f8c8d"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -60,10 +60,9 @@ export default function GlobalDishFinderScreen() {
                     contentContainerStyle={styles.scrollListPadding}
                     renderItem={({ item }) => (
                         <TouchableOpacity onPress={() => setSelectedDish(item)} style={styles.recipeDataCard} activeOpacity={0.9}>
-                            <Image source={{ uri: item.image }} style={styles.recipeCardThumbnail} />
                             <View style={styles.recipeCardDetails}>
                                 <Text style={styles.recipeCardTitle} numberOfLines={2}>{item.title}</Text>
-                                <Text style={styles.actionPromptText}>Tap to open step instructions ➔</Text>
+                                <Text style={styles.actionPromptText}>Tap to open ingredients & step instructions ➔</Text>
                             </View>
                         </TouchableOpacity>
                     )}
@@ -80,7 +79,6 @@ export default function GlobalDishFinderScreen() {
 
                         {selectedDish && (
                             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
-                                <Image source={{ uri: selectedDish.image }} style={styles.popupHeroBannerImage} />
                                 <Text style={styles.popupMainDishTitle}>{selectedDish.title}</Text>
 
                                 <Text style={styles.popupSectionHeadingTitle}>📋 Ingredients Required</Text>
