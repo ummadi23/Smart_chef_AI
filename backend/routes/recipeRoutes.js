@@ -2550,9 +2550,11 @@ router.post('/ayurvedic-remedy', (req, res) => {
     console.error('Ayurvedic remedy error:', error);
     res.status(500).json({ message: 'Failed to find remedy.' });
   }
-  // =================================================================
-  // ROUTE: AI RECIPE RECOMMENDATION MATCHING ALGORITHM
-  // =================================================================
+});
+
+// =================================================================
+// ROUTE: AI RECIPE RECOMMENDATION MATCHING ALGORITHM
+// =================================================================
   router.post(['/recommend', '/api/recipes/recommend'], async (req, res) => {
     try {
       const userIngredients = (req.body.ingredients || []).map(i => i.toLowerCase().trim()).filter(Boolean);
