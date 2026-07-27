@@ -590,7 +590,7 @@ async function callGeminiVisionApi(imageBase64, promptText) {
   }
 
   const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-flash'];
+  const models = ['gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash'];
   let lastError = null;
 
   for (const model of models) {
