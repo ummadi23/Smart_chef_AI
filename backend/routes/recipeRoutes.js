@@ -421,16 +421,28 @@ router.post('/scan-fridge', (req, res, next) => {
 
     console.log(`🔍 [INGREDIENT PHOTO VISION SCANNER] Processing photo payload frame (${imageBase64.length} bytes, Lang: ${userLanguage})`);
 
-    const SCENE_AGNOSTIC_PROMPT = `You are a precision AI Object Detection Vision model. Look at the photo and identify EVERY distinct food item, vegetable, fruit, meat, dairy, or ingredient visible.
-For each detected item, return its exact name and 2D bounding box percentage coordinates (top, left, width, height as numbers between 0 and 100) relative to the image boundaries.
+    const SCENE_AGNOSTIC_PROMPT = `You are a highly advanced Computer Vision and Culinary Intelligence System. Your sole task is to perform a strict, literal audit of the raw ingredients visible in the user's uploaded image. 
 
-Return ONLY valid JSON:
+CRITICAL SAFETY & OPERATIONAL MANDATES:
+1. ONLY list items that are physically, visually present in the image. Never extrapolate, guess, or assume items exist because they typically pair with other visible ingredients.
+2. If an ingredient is partially blocked or ambiguous, flag its uncertainty in ambiguous_items_requiring_user_verification rather than guessing.
+3. For each detected item, return its exact lowercase name, confidence score ("High", "Medium", or "Low"), visual description (color, state, quantity), and 2D bounding box percentage coordinates (top, left, width, height as numbers 0-100).
+4. Ignore background elements, kitchen utensils, packaging branding, or plates unless they contain food.
+
+Return ONLY valid JSON format without markdown ticks:
 {
-  "items": [
+  "detected_ingredients": [
     {
-      "name": "Tomatoes",
-      "confidence": 0.95,
-      "box": { "top": 50, "left": 40, "width": 18, "height": 18 }
+      "name": "tomatoes",
+      "confidence_score": "High",
+      "visual_description": "3 red raw whole tomatoes",
+      "box": { "top": 45, "left": 40, "width": 18, "height": 18 }
+    }
+  ],
+  "ambiguous_items_requiring_user_verification": [
+    {
+      "observed_visual_features": "Green round leafy item partially hidden under bag",
+      "best_guess_options": ["cabbage", "lettuce"]
     }
   ]
 }`;
@@ -442,6 +454,9 @@ Return ONLY valid JSON:
     // Helper to extract clean ingredient string names
     const parseItemList = (resObj) => {
       if (!resObj) return [];
+      if (Array.isArray(resObj.detected_ingredients)) {
+        return resObj.detected_ingredients.map(i => (typeof i === 'string' ? i : i.name)).filter(Boolean);
+      }
       if (Array.isArray(resObj.items)) {
         return resObj.items.map(i => (typeof i === 'string' ? i : i.name)).filter(Boolean);
       }
@@ -533,10 +548,12 @@ Return ONLY valid JSON:
 
     // Format final response object
     let objectsDetected = [];
-    if (visionResult && Array.isArray(visionResult.items)) {
-      objectsDetected = visionResult.items.map(it => ({
+    const sourceArr = visionResult?.detected_ingredients || visionResult?.items;
+    if (Array.isArray(sourceArr)) {
+      objectsDetected = sourceArr.map(it => ({
         name: typeof it === 'string' ? it : it.name,
-        score: typeof it === 'object' && it.confidence === 'high' ? 0.95 : 0.88,
+        score: typeof it === 'object' && (it.confidence === 'high' || it.confidence_score === 'High') ? 0.95 : 0.88,
+        visual_description: typeof it === 'object' ? it.visual_description : '',
         box: typeof it === 'object' && it.box ? it.box : null
       }));
     } else {
