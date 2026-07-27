@@ -14,7 +14,6 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
 
   const popularIngredients = [
     { name: 'Fresh Chicken', emoji: '🍗' },
-    { name: 'Fresh Fish', emoji: '🐟' },
     { name: 'Paneer', emoji: '🧀' },
     { name: 'Red Tomatoes', emoji: '🍅' },
     { name: 'Whole Milk', emoji: '🥛' },
