@@ -202,12 +202,11 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
                   </View>
                 </View>
 
-                {/* Ingredient Image Cards */}
+                {/* Ingredient Names (Text Only) */}
                 <Text style={s.sectionTitle}>🧪 Ingredients Required:</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.ingScroll} contentContainerStyle={s.ingScrollContent}>
                   {remedy.ingredientCards.map((card, i) => (
                     <View key={i} style={[s.ingCard, { borderColor: remedy.color + '44' }]}>
-                      <HerbCardImage uri={card.image} name={card.name} color={remedy.color} />
                       <Text style={[s.ingCardName, { color: remedy.color }]} numberOfLines={2}>{card.name}</Text>
                       <Text style={s.ingCardQty} numberOfLines={2}>{card.quantity}</Text>
                     </View>
@@ -333,7 +332,7 @@ const s = StyleSheet.create({
   // Ingredient image cards (horizontal scroll)
   ingScroll: { marginBottom: 8 },
   ingScrollContent: { paddingHorizontal: 16, paddingBottom: 12, gap: 12 },
-  ingCard: { width: 130, backgroundColor: '#0B132B', borderRadius: 16, borderWidth: 1, overflow: 'hidden', alignItems: 'center', padding: 8 },
+  ingCard: { minWidth: 120, backgroundColor: '#0B132B', borderRadius: 14, borderWidth: 1, overflow: 'hidden', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 12 },
   ingImg: { width: 114, height: 90, borderRadius: 12, marginBottom: 8, backgroundColor: '#1E293B' },
   fallbackImgBox: { justifyContent: 'center', alignItems: 'center' },
   fallbackEmoji: { fontSize: 36 },
