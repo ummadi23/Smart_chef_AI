@@ -347,28 +347,16 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
                 <View style={[styles.hudCorner, styles.hudBottomLeft]} />
                 <View style={[styles.hudCorner, styles.hudBottomRight]} />
 
-                {/* Object Bounding Boxes & Tags Overlay */}
-                {detectedObjects.length > 0 ? (
+                {/* Object Bounding Boxes & Tags Overlay — rendered ONLY when real coordinates exist */}
+                {detectedObjects.length > 0 && detectedObjects.some((o: any) => o.boundingBox && Array.isArray(o.boundingBox)) ? (
                   detectedObjects.map((obj: any, idx: number) => {
-                    let top = 15 + (idx * 20) % 60;
-                    let left = 10 + (idx * 22) % 65;
-                    let width = 28;
-                    let height = 22;
-
-                    if (obj.boundingBox && Array.isArray(obj.boundingBox) && obj.boundingBox.length >= 2) {
-                      const p1 = obj.boundingBox[0];
-                      const p2 = obj.boundingBox[1];
-                      left = (p1.x || 0) * 100;
-                      top = (p1.y || 0) * 100;
-                      width = Math.max(15, ((p2.x || 0) - (p1.x || 0)) * 100);
-                      height = Math.max(12, ((p2.y || 0) - (p1.y || 0)) * 100);
-                    } else if (obj.box) {
-                      top = obj.box.top;
-                      left = obj.box.left;
-                      width = obj.box.width;
-                      height = obj.box.height;
-                    }
-
+                    if (!obj.boundingBox || !Array.isArray(obj.boundingBox) || obj.boundingBox.length < 2) return null;
+                    const p1 = obj.boundingBox[0];
+                    const p2 = obj.boundingBox[1];
+                    const left = (p1.x || 0) * 100;
+                    const top = (p1.y || 0) * 100;
+                    const width = Math.max(15, ((p2.x || 0) - (p1.x || 0)) * 100);
+                    const height = Math.max(12, ((p2.y || 0) - (p1.y || 0)) * 100);
                     const confidenceScore = obj.confidence || obj.score;
 
                     return (
