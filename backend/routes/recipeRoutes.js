@@ -883,9 +883,9 @@ router.post('/suggest-by-ingredients', async (req, res) => {
           score
         };
       })
-      .filter(r => r.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
+        .filter(r => r.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
 
       if (matched.length > 0) {
         return res.json({
@@ -1861,7 +1861,7 @@ function generateGenericRecipe(ingredients) {
   const items = ingredients.split(',').map(s => s.trim()).filter(Boolean);
   const mainItem = items[0] || 'mixed ingredients';
   const lowerMain = mainItem.toLowerCase();
-  
+
   const isLiquid = ['rasam', 'sambar', 'soup', 'dal', 'curry', 'gravy', 'sauce', 'broth', 'pulusu', 'kadhi', 'kadi', 'korma', 'stew'].some(k => lowerMain.includes(k));
 
   if (isLiquid) {
@@ -2550,233 +2550,233 @@ router.post('/ayurvedic-remedy', (req, res) => {
     console.error('Ayurvedic remedy error:', error);
     res.status(500).json({ message: 'Failed to find remedy.' });
   }
-// =================================================================
-// ROUTE: AI RECIPE RECOMMENDATION MATCHING ALGORITHM
-// =================================================================
-router.post(['/recommend', '/api/recipes/recommend'], async (req, res) => {
-  try {
-    const userIngredients = (req.body.ingredients || []).map(i => i.toLowerCase().trim()).filter(Boolean);
-    const { vegetarian, vegan, glutenFree, highProtein, lowCalorie, maxTime, cuisine, category, search } = req.body.filters || req.body;
+  // =================================================================
+  // ROUTE: AI RECIPE RECOMMENDATION MATCHING ALGORITHM
+  // =================================================================
+  router.post(['/recommend', '/api/recipes/recommend'], async (req, res) => {
+    try {
+      const userIngredients = (req.body.ingredients || []).map(i => i.toLowerCase().trim()).filter(Boolean);
+      const { vegetarian, vegan, glutenFree, highProtein, lowCalorie, maxTime, cuisine, category, search } = req.body.filters || req.body;
 
-    const recipesFilePath = path.join(__dirname, '..', 'data', 'recipes.json');
-    let allRecipes = [];
-    if (fs.existsSync(recipesFilePath)) {
-      allRecipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
-    }
-
-    if (allRecipes.length === 0) {
-      return res.json({ status: 'success', count: 0, recipes: [] });
-    }
-
-    const scoredRecipes = allRecipes.map(recipe => {
-      const recipeIngs = (recipe.ingredients || []).map(i => (typeof i === 'string' ? i : i.name || String(i)));
-      const recipeIngsLower = recipeIngs.map(i => i.toLowerCase());
-
-      const matched = [];
-      const missing = [];
-
-      recipeIngs.forEach((ing, idx) => {
-        const ingLower = recipeIngsLower[idx];
-        const isMatched = userIngredients.some(uIng => ingLower.includes(uIng) || uIng.includes(ingLower));
-        if (isMatched) {
-          matched.push(ing);
-        } else {
-          missing.push(ing);
-        }
-      });
-
-      const totalCount = recipeIngs.length || 1;
-      const matchPercentage = Math.min(100, Math.round((matched.length / totalCount) * 100));
-
-      return {
-        id: recipe.id || recipe._id || crypto.randomUUID(),
-        title: recipe.title || recipe.name || 'Delicious Dish',
-        description: recipe.description || 'A healthy, delicious recipe made with fresh ingredients.',
-        image: recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-        cuisine: recipe.cuisine || 'Global',
-        category: recipe.category || 'Lunch / Dinner',
-        prepTime: recipe.prepTime || '15 mins',
-        cookTime: recipe.cookTime || '25 mins',
-        difficulty: recipe.difficulty || 'Medium',
-        servings: recipe.servings || 2,
-        isVegetarian: !!recipe.isVegetarian,
-        isVegan: !!recipe.isVegan,
-        isGlutenFree: !!recipe.isGlutenFree,
-        isHighProtein: !!recipe.isHighProtein,
-        isLowCalorie: !!recipe.isLowCalorie,
-        nutrition: recipe.nutrition || { calories: 350, protein: '15g', fat: '10g', carbs: '45g' },
-        ingredients: recipeIngs,
-        matchedIngredients: matched,
-        missingIngredients: missing,
-        matchPercentage: matchPercentage,
-        instructions: recipe.instructions || ["Prep ingredients.", "Cook thoroughly.", "Serve warm!"]
-      };
-    });
-
-    // Apply dietary & time filters if specified
-    let filtered = scoredRecipes.filter(r => {
-      if (vegetarian && !r.isVegetarian) return false;
-      if (vegan && !r.isVegan) return false;
-      if (glutenFree && !r.isGlutenFree) return false;
-      if (highProtein && !r.isHighProtein) return false;
-      if (lowCalorie && !r.isLowCalorie) return false;
-      if (cuisine && r.cuisine.toLowerCase() !== cuisine.toLowerCase()) return false;
-      if (category && r.category.toLowerCase() !== category.toLowerCase()) return false;
-      if (search) {
-        const sLower = search.toLowerCase();
-        if (!r.title.toLowerCase().includes(sLower) && !r.cuisine.toLowerCase().includes(sLower)) return false;
+      const recipesFilePath = path.join(__dirname, '..', 'data', 'recipes.json');
+      let allRecipes = [];
+      if (fs.existsSync(recipesFilePath)) {
+        allRecipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
       }
-      return true;
-    });
 
-    // Sort by highest match percentage descending
-    filtered.sort((a, b) => b.matchPercentage - a.matchPercentage);
+      if (allRecipes.length === 0) {
+        return res.json({ status: 'success', count: 0, recipes: [] });
+      }
 
-    res.json({
-      status: 'success',
-      count: filtered.length,
-      recipes: filtered.slice(0, 30)
-    });
+      const scoredRecipes = allRecipes.map(recipe => {
+        const recipeIngs = (recipe.ingredients || []).map(i => (typeof i === 'string' ? i : i.name || String(i)));
+        const recipeIngsLower = recipeIngs.map(i => i.toLowerCase());
 
-  } catch (error) {
-    console.error('Recipe recommendation error:', error);
-    res.status(500).json({ status: 'error', message: 'Failed to calculate recipe recommendations.' });
-  }
-});
+        const matched = [];
+        const missing = [];
 
-// =================================================================
-// NEW ROUTE: FETCH ALL RECIPES FROM THE INTERNET API
-// =================================================================
-router.get(['/search-recipes', '/api/recipes/search-recipes'], async (req, res) => {
-  const query = (req.query.dish || '').trim();
-  console.log("DEBUG: Global dish search query ->", query);
-
-  if (!query) return res.json([]);
-
-  const qLower = query.toLowerCase();
-
-  // 1. SEARCH LOCAL DATABASE (2,177 recipes including 500 Indian dishes)
-  let localMatches = [];
-  try {
-    const recipesFilePath = path.join(__dirname, '..', 'data', 'recipes.json');
-    if (fs.existsSync(recipesFilePath)) {
-      const allRecipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
-
-      const scored = allRecipes.map(recipe => {
-        const title = (recipe.title || '').toLowerCase();
-        const cuisine = (recipe.cuisine || '').toLowerCase();
-        const subCuisine = (recipe.subCuisine || '').toLowerCase();
-        const category = (recipe.category || '').toLowerCase();
-        const ingredients = (recipe.ingredients || []).map(i => (typeof i === 'string' ? i : i.name || '').toLowerCase());
-
-        let score = 0;
-
-        // Exact title match
-        if (title === qLower) score += 300;
-        // Title starts with query
-        else if (title.startsWith(qLower)) score += 200;
-        // Title contains query
-        else if (title.includes(qLower)) score += 100;
-
-        // Words in query match words in title
-        const queryWords = qLower.split(/\s+/);
-        queryWords.forEach(w => {
-          if (w.length > 2 && title.includes(w)) score += 40;
-        });
-
-        // Cuisine or Category matches
-        if (cuisine.includes(qLower) || subCuisine.includes(qLower)) score += 50;
-        if (category.includes(qLower)) score += 30;
-
-        // Ingredient matches
-        if (ingredients.some(ing => ing.includes(qLower))) score += 25;
-
-        return { recipe, score };
-      });
-
-      const uniqueResultsMap = new Map();
-
-      scored
-        .filter(item => item.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .forEach(item => {
-          let cleanTitle = (item.recipe.title || '').replace(/\s*\((Traditional\s*Style|Style|Var|Variation|\d+).*?\)/gi, '').trim().replace(/\s+/g, ' ');
-          const key = cleanTitle.toLowerCase();
-          if (!uniqueResultsMap.has(key)) {
-            uniqueResultsMap.set(key, {
-              id: item.recipe.id || crypto.randomUUID(),  // Fixes M-009: no Math.random()
-              title: cleanTitle,
-              image: item.recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-              ingredients: (item.recipe.ingredients || []).map(ing => (typeof ing === 'string' ? ing : ing.name || String(ing))),
-              instructions: item.recipe.instructions || [
-                "Prepare fresh ingredients according to standard culinary methods.",
-                "Cook thoroughly on medium heat until aromas release.",
-                "Serve fresh and enjoy hot!"
-              ]
-            });
+        recipeIngs.forEach((ing, idx) => {
+          const ingLower = recipeIngsLower[idx];
+          const isMatched = userIngredients.some(uIng => ingLower.includes(uIng) || uIng.includes(ingLower));
+          if (isMatched) {
+            matched.push(ing);
+          } else {
+            missing.push(ing);
           }
         });
 
-      localMatches = Array.from(uniqueResultsMap.values());
+        const totalCount = recipeIngs.length || 1;
+        const matchPercentage = Math.min(100, Math.round((matched.length / totalCount) * 100));
+
+        return {
+          id: recipe.id || recipe._id || crypto.randomUUID(),
+          title: recipe.title || recipe.name || 'Delicious Dish',
+          description: recipe.description || 'A healthy, delicious recipe made with fresh ingredients.',
+          image: recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+          cuisine: recipe.cuisine || 'Global',
+          category: recipe.category || 'Lunch / Dinner',
+          prepTime: recipe.prepTime || '15 mins',
+          cookTime: recipe.cookTime || '25 mins',
+          difficulty: recipe.difficulty || 'Medium',
+          servings: recipe.servings || 2,
+          isVegetarian: !!recipe.isVegetarian,
+          isVegan: !!recipe.isVegan,
+          isGlutenFree: !!recipe.isGlutenFree,
+          isHighProtein: !!recipe.isHighProtein,
+          isLowCalorie: !!recipe.isLowCalorie,
+          nutrition: recipe.nutrition || { calories: 350, protein: '15g', fat: '10g', carbs: '45g' },
+          ingredients: recipeIngs,
+          matchedIngredients: matched,
+          missingIngredients: missing,
+          matchPercentage: matchPercentage,
+          instructions: recipe.instructions || ["Prep ingredients.", "Cook thoroughly.", "Serve warm!"]
+        };
+      });
+
+      // Apply dietary & time filters if specified
+      let filtered = scoredRecipes.filter(r => {
+        if (vegetarian && !r.isVegetarian) return false;
+        if (vegan && !r.isVegan) return false;
+        if (glutenFree && !r.isGlutenFree) return false;
+        if (highProtein && !r.isHighProtein) return false;
+        if (lowCalorie && !r.isLowCalorie) return false;
+        if (cuisine && r.cuisine.toLowerCase() !== cuisine.toLowerCase()) return false;
+        if (category && r.category.toLowerCase() !== category.toLowerCase()) return false;
+        if (search) {
+          const sLower = search.toLowerCase();
+          if (!r.title.toLowerCase().includes(sLower) && !r.cuisine.toLowerCase().includes(sLower)) return false;
+        }
+        return true;
+      });
+
+      // Sort by highest match percentage descending
+      filtered.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+      res.json({
+        status: 'success',
+        count: filtered.length,
+        recipes: filtered.slice(0, 30)
+      });
+
+    } catch (error) {
+      console.error('Recipe recommendation error:', error);
+      res.status(500).json({ status: 'error', message: 'Failed to calculate recipe recommendations.' });
     }
-  } catch (e) {
-    console.error("Error searching local recipes dataset:", e);
-  }
+  });
 
-  if (localMatches.length > 0) {
-    console.log(`✅ Found ${localMatches.length} unique matching recipes in local database for query "${query}"`);
-    return res.json(localMatches.slice(0, 20));
-  }
+  // =================================================================
+  // NEW ROUTE: FETCH ALL RECIPES FROM THE INTERNET API
+  // =================================================================
+  router.get(['/search-recipes', '/api/recipes/search-recipes'], async (req, res) => {
+    const query = (req.query.dish || '').trim();
+    console.log("DEBUG: Global dish search query ->", query);
 
-  // 2. FALLBACK TO SPOONACULAR API
-  try {
-    const axios = require('axios');
-    const apiResponse = await axios.get('https://api.spoonacular.com/recipes/complexSearch', {
-      params: {
-        query: query,
-        apiKey: process.env.SPOONACULAR_API_KEY,
-        number: 10,
-        fillIngredients: true
+    if (!query) return res.json([]);
+
+    const qLower = query.toLowerCase();
+
+    // 1. SEARCH LOCAL DATABASE (2,177 recipes including 500 Indian dishes)
+    let localMatches = [];
+    try {
+      const recipesFilePath = path.join(__dirname, '..', 'data', 'recipes.json');
+      if (fs.existsSync(recipesFilePath)) {
+        const allRecipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
+
+        const scored = allRecipes.map(recipe => {
+          const title = (recipe.title || '').toLowerCase();
+          const cuisine = (recipe.cuisine || '').toLowerCase();
+          const subCuisine = (recipe.subCuisine || '').toLowerCase();
+          const category = (recipe.category || '').toLowerCase();
+          const ingredients = (recipe.ingredients || []).map(i => (typeof i === 'string' ? i : i.name || '').toLowerCase());
+
+          let score = 0;
+
+          // Exact title match
+          if (title === qLower) score += 300;
+          // Title starts with query
+          else if (title.startsWith(qLower)) score += 200;
+          // Title contains query
+          else if (title.includes(qLower)) score += 100;
+
+          // Words in query match words in title
+          const queryWords = qLower.split(/\s+/);
+          queryWords.forEach(w => {
+            if (w.length > 2 && title.includes(w)) score += 40;
+          });
+
+          // Cuisine or Category matches
+          if (cuisine.includes(qLower) || subCuisine.includes(qLower)) score += 50;
+          if (category.includes(qLower)) score += 30;
+
+          // Ingredient matches
+          if (ingredients.some(ing => ing.includes(qLower))) score += 25;
+
+          return { recipe, score };
+        });
+
+        const uniqueResultsMap = new Map();
+
+        scored
+          .filter(item => item.score > 0)
+          .sort((a, b) => b.score - a.score)
+          .forEach(item => {
+            let cleanTitle = (item.recipe.title || '').replace(/\s*\((Traditional\s*Style|Style|Var|Variation|\d+).*?\)/gi, '').trim().replace(/\s+/g, ' ');
+            const key = cleanTitle.toLowerCase();
+            if (!uniqueResultsMap.has(key)) {
+              uniqueResultsMap.set(key, {
+                id: item.recipe.id || crypto.randomUUID(),  // Fixes M-009: no Math.random()
+                title: cleanTitle,
+                image: item.recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+                ingredients: (item.recipe.ingredients || []).map(ing => (typeof ing === 'string' ? ing : ing.name || String(ing))),
+                instructions: item.recipe.instructions || [
+                  "Prepare fresh ingredients according to standard culinary methods.",
+                  "Cook thoroughly on medium heat until aromas release.",
+                  "Serve fresh and enjoy hot!"
+                ]
+              });
+            }
+          });
+
+        localMatches = Array.from(uniqueResultsMap.values());
       }
-    });
-
-    if (apiResponse.data && apiResponse.data.results && apiResponse.data.results.length > 0) {
-      const formattedRecipes = apiResponse.data.results.map(dish => ({
-        id: dish.id.toString(),
-        title: dish.title,
-        image: dish.image,
-        ingredients: dish.extendedIngredients ? dish.extendedIngredients.map(i => i.original) : ["Fresh ingredients matching recipe name"],
-        instructions: ["Mix fresh ingredients thoroughly.", "Simmer on low to medium heat for 20-30 minutes.", "Garnish nicely and serve hot while fresh."]
-      }));
-      return res.json(formattedRecipes);
+    } catch (e) {
+      console.error("Error searching local recipes dataset:", e);
     }
-  } catch (error) {
-    console.warn("Spoonacular API fallback note ->", error.message);
-  }
 
-  // 3. DYNAMIC SYNTHETIC FALLBACK (Guarantees user always gets a recipe result for any dish query!)
-  const capitalizedQuery = query.charAt(0).toUpperCase() + query.slice(1);
-  const fallbackRecipe = [{
-    id: `custom_${Date.now()}`,
-    title: `${capitalizedQuery} Special Recipe`,
-    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
-    ingredients: [
-      `Fresh ingredients for ${capitalizedQuery}`,
-      "Onions & Garlic base",
-      "Traditional Spices & Herbs",
-      "Cooking Oil or Ghee",
-      "Salt and Fresh Herbs to taste"
-    ],
-    instructions: [
-      `Step 1: Clean and prepare main ingredients for ${capitalizedQuery}.`,
-      "Step 2: Heat oil or ghee in a pan and sauté aromatics until golden brown.",
-      "Step 3: Add main ingredients with traditional spices and simmer on medium heat.",
-      "Step 4: Cook until tender and fragrant.",
-      "Step 5: Garnish with fresh herbs and serve hot!"
-    ]
-  }];
+    if (localMatches.length > 0) {
+      console.log(`✅ Found ${localMatches.length} unique matching recipes in local database for query "${query}"`);
+      return res.json(localMatches.slice(0, 20));
+    }
 
-  return res.json(fallbackRecipe);
-});
+    // 2. FALLBACK TO SPOONACULAR API
+    try {
+      const axios = require('axios');
+      const apiResponse = await axios.get('https://api.spoonacular.com/recipes/complexSearch', {
+        params: {
+          query: query,
+          apiKey: process.env.SPOONACULAR_API_KEY,
+          number: 10,
+          fillIngredients: true
+        }
+      });
 
-module.exports = router;
+      if (apiResponse.data && apiResponse.data.results && apiResponse.data.results.length > 0) {
+        const formattedRecipes = apiResponse.data.results.map(dish => ({
+          id: dish.id.toString(),
+          title: dish.title,
+          image: dish.image,
+          ingredients: dish.extendedIngredients ? dish.extendedIngredients.map(i => i.original) : ["Fresh ingredients matching recipe name"],
+          instructions: ["Mix fresh ingredients thoroughly.", "Simmer on low to medium heat for 20-30 minutes.", "Garnish nicely and serve hot while fresh."]
+        }));
+        return res.json(formattedRecipes);
+      }
+    } catch (error) {
+      console.warn("Spoonacular API fallback note ->", error.message);
+    }
+
+    // 3. DYNAMIC SYNTHETIC FALLBACK (Guarantees user always gets a recipe result for any dish query!)
+    const capitalizedQuery = query.charAt(0).toUpperCase() + query.slice(1);
+    const fallbackRecipe = [{
+      id: `custom_${Date.now()}`,
+      title: `${capitalizedQuery} Special Recipe`,
+      image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+      ingredients: [
+        `Fresh ingredients for ${capitalizedQuery}`,
+        "Onions & Garlic base",
+        "Traditional Spices & Herbs",
+        "Cooking Oil or Ghee",
+        "Salt and Fresh Herbs to taste"
+      ],
+      instructions: [
+        `Step 1: Clean and prepare main ingredients for ${capitalizedQuery}.`,
+        "Step 2: Heat oil or ghee in a pan and sauté aromatics until golden brown.",
+        "Step 3: Add main ingredients with traditional spices and simmer on medium heat.",
+        "Step 4: Cook until tender and fragrant.",
+        "Step 5: Garnish with fresh herbs and serve hot!"
+      ]
+    }];
+
+    return res.json(fallbackRecipe);
+  });
+
+module.exports = router;
