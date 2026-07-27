@@ -2550,7 +2550,100 @@ router.post('/ayurvedic-remedy', (req, res) => {
     console.error('Ayurvedic remedy error:', error);
     res.status(500).json({ message: 'Failed to find remedy.' });
   }
+// =================================================================
+// ROUTE: AI RECIPE RECOMMENDATION MATCHING ALGORITHM
+// =================================================================
+router.post(['/recommend', '/api/recipes/recommend'], async (req, res) => {
+  try {
+    const userIngredients = (req.body.ingredients || []).map(i => i.toLowerCase().trim()).filter(Boolean);
+    const { vegetarian, vegan, glutenFree, highProtein, lowCalorie, maxTime, cuisine, category, search } = req.body.filters || req.body;
+
+    const recipesFilePath = path.join(__dirname, '..', 'data', 'recipes.json');
+    let allRecipes = [];
+    if (fs.existsSync(recipesFilePath)) {
+      allRecipes = JSON.parse(fs.readFileSync(recipesFilePath, 'utf8'));
+    }
+
+    if (allRecipes.length === 0) {
+      return res.json({ status: 'success', count: 0, recipes: [] });
+    }
+
+    const scoredRecipes = allRecipes.map(recipe => {
+      const recipeIngs = (recipe.ingredients || []).map(i => (typeof i === 'string' ? i : i.name || String(i)));
+      const recipeIngsLower = recipeIngs.map(i => i.toLowerCase());
+
+      const matched = [];
+      const missing = [];
+
+      recipeIngs.forEach((ing, idx) => {
+        const ingLower = recipeIngsLower[idx];
+        const isMatched = userIngredients.some(uIng => ingLower.includes(uIng) || uIng.includes(ingLower));
+        if (isMatched) {
+          matched.push(ing);
+        } else {
+          missing.push(ing);
+        }
+      });
+
+      const totalCount = recipeIngs.length || 1;
+      const matchPercentage = Math.min(100, Math.round((matched.length / totalCount) * 100));
+
+      return {
+        id: recipe.id || recipe._id || crypto.randomUUID(),
+        title: recipe.title || recipe.name || 'Delicious Dish',
+        description: recipe.description || 'A healthy, delicious recipe made with fresh ingredients.',
+        image: recipe.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80',
+        cuisine: recipe.cuisine || 'Global',
+        category: recipe.category || 'Lunch / Dinner',
+        prepTime: recipe.prepTime || '15 mins',
+        cookTime: recipe.cookTime || '25 mins',
+        difficulty: recipe.difficulty || 'Medium',
+        servings: recipe.servings || 2,
+        isVegetarian: !!recipe.isVegetarian,
+        isVegan: !!recipe.isVegan,
+        isGlutenFree: !!recipe.isGlutenFree,
+        isHighProtein: !!recipe.isHighProtein,
+        isLowCalorie: !!recipe.isLowCalorie,
+        nutrition: recipe.nutrition || { calories: 350, protein: '15g', fat: '10g', carbs: '45g' },
+        ingredients: recipeIngs,
+        matchedIngredients: matched,
+        missingIngredients: missing,
+        matchPercentage: matchPercentage,
+        instructions: recipe.instructions || ["Prep ingredients.", "Cook thoroughly.", "Serve warm!"]
+      };
+    });
+
+    // Apply dietary & time filters if specified
+    let filtered = scoredRecipes.filter(r => {
+      if (vegetarian && !r.isVegetarian) return false;
+      if (vegan && !r.isVegan) return false;
+      if (glutenFree && !r.isGlutenFree) return false;
+      if (highProtein && !r.isHighProtein) return false;
+      if (lowCalorie && !r.isLowCalorie) return false;
+      if (cuisine && r.cuisine.toLowerCase() !== cuisine.toLowerCase()) return false;
+      if (category && r.category.toLowerCase() !== category.toLowerCase()) return false;
+      if (search) {
+        const sLower = search.toLowerCase();
+        if (!r.title.toLowerCase().includes(sLower) && !r.cuisine.toLowerCase().includes(sLower)) return false;
+      }
+      return true;
+    });
+
+    // Sort by highest match percentage descending
+    filtered.sort((a, b) => b.matchPercentage - a.matchPercentage);
+
+    res.json({
+      status: 'success',
+      count: filtered.length,
+      recipes: filtered.slice(0, 30)
+    });
+
+  } catch (error) {
+    console.error('Recipe recommendation error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to calculate recipe recommendations.' });
+  }
 });
+
 // =================================================================
 // NEW ROUTE: FETCH ALL RECIPES FROM THE INTERNET API
 // =================================================================

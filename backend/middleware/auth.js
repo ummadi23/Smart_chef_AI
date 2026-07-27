@@ -77,4 +77,17 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+const requireAdmin = (req, res, next) => {
+  if (req.user && (req.user.role === 'admin' || req.user.email?.toLowerCase().includes('admin'))) {
+    return next();
+  }
+  return res.status(403).json({
+    status: 'error',
+    error: 'FORBIDDEN',
+    message: 'Access denied. Admin privileges required.'
+  });
+};
+
 module.exports = authMiddleware;
+module.exports.requireAdmin = requireAdmin;
+

@@ -74,11 +74,13 @@ const authRoutes = require('./routes/auth');
 const recipeRoutes = require('./routes/recipeRoutes');
 const communityRoutes = require('./routes/communityRoutes');
 const ayurvedaRoutes = require('./routes/ayurvedaRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/recipes', apiLimiter, recipeRoutes);
 app.use('/api/community', apiLimiter, communityRoutes);
 app.use('/api/ayurveda', apiLimiter, ayurvedaRoutes);
+app.use('/api/admin', apiLimiter, adminRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'The Smart Chef cloud backend is operational!' });
