@@ -76,19 +76,13 @@ function OrderSheet({
 
 export default function VoiceAssistantScreen({ onBack }: { onBack: () => void }) {
   const [youtubeLink, setYoutubeLink] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState<'English' | 'Telugu'>('English');
   const [isProcessing, setIsProcessing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<YouTubeAnalysisResult | null>(null);
   const [orderIngredient, setOrderIngredient] = useState<IngredientItem | null>(null);
 
-  const isTelugu = selectedLanguage === 'Telugu';
-
   const handleTranslateLink = async () => {
     if (!youtubeLink.trim()) {
-      Alert.alert(
-        isTelugu ? 'లింక్ అవసరం' : 'Input Required',
-        isTelugu ? 'దయచేసి ముందు YouTube రెసిపీ లింక్ పేస్ట్ చేయండి.' : 'Please paste a valid YouTube recipe link first.'
-      );
+      Alert.alert('Input Required', 'Please paste a valid YouTube recipe link first.');
       return;
     }
     setIsProcessing(true);
@@ -97,16 +91,16 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
       const response = await fetch(`${getApiBaseUrl()}/api/recipes/analyze-youtube`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ youtubeUrl: youtubeLink.trim(), language: selectedLanguage }),
+        body: JSON.stringify({ youtubeUrl: youtubeLink.trim(), language: 'English' }),
       });
       const json = await response.json();
       if (response.ok && (json.data || json.videoId)) {
         setAnalysisResult(json.data || json);
       } else {
-        alert(json.message || (isTelugu ? 'వీడియో విశ్లేషించడం సాధ్యం కాలేదు.' : 'Could not analyze YouTube video.'));
+        alert(json.message || 'Could not analyze YouTube video.');
       }
     } catch {
-      alert(isTelugu ? 'బ్యాకెండ్ సర్వర్కి కనెక్ట్ కాలేదు! (Port 5000)' : 'Cannot connect to backend server on port 5000!');
+      alert('Cannot connect to backend server on port 5000!');
     } finally {
       setIsProcessing(false);
     }
@@ -115,7 +109,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
   return (
     <View style={styles.container}>
       {orderIngredient && (
-        <OrderSheet ingredient={orderIngredient} isTelugu={isTelugu} onClose={() => setOrderIngredient(null)} />
+        <OrderSheet ingredient={orderIngredient} isTelugu={false} onClose={() => setOrderIngredient(null)} />
       )}
 
       <View style={styles.header}>
@@ -128,34 +122,17 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.introText}>
-          {isTelugu
-            ? 'ఏదైనా YouTube రెసిపీ లింక్ అతికించండి. మా AI ఆ వీడియో నుండి పదార్థాలు మరియు దశల వారీ వంట విధానాన్ని అందిస్తుంది!'
-            : 'Paste any YouTube recipe link below. Our AI will extract ingredients with exact quantities and step-by-step cooking instructions!'}
+          Paste any YouTube recipe link below. Our AI will extract ingredients with exact quantities and step-by-step cooking instructions!
         </Text>
 
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputField}
-            placeholder={isTelugu ? 'YouTube లింక్ పేస్ట్ చేయండి...' : 'Paste YouTube Link (e.g., https://youtu.be/...)'}
+            placeholder="Paste YouTube Link (e.g., https://youtu.be/...)"
             placeholderTextColor="#8E8E93"
             value={youtubeLink}
             onChangeText={setYoutubeLink}
           />
-        </View>
-
-        <Text style={styles.sectionLabel}>{isTelugu ? 'భాష ఎంచుకోండి:' : 'Select Recipe Output Language:'}</Text>
-        <View style={styles.languageContainer}>
-          {(['English', 'Telugu'] as const).map((lang) => (
-            <TouchableOpacity
-              key={lang}
-              style={[styles.languagePill, selectedLanguage === lang && styles.activePill]}
-              onPress={() => setSelectedLanguage(lang)}
-            >
-              <Text style={[styles.pillText, selectedLanguage === lang && styles.activePillText]}>
-                {lang === 'Telugu' ? 'తెలుగు (Telugu)' : 'English'}
-              </Text>
-            </TouchableOpacity>
-          ))}
         </View>
 
         <TouchableOpacity
@@ -166,9 +143,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
           {isProcessing ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.processButtonText}>
-              {isTelugu ? 'రెసిపీ తయారు చేయి' : 'Extract & Translate Recipe'}
-            </Text>
+            <Text style={styles.processButtonText}>Extract Recipe</Text>
           )}
         </TouchableOpacity>
 
@@ -197,7 +172,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
             {analysisResult.ingredients && analysisResult.ingredients.length > 0 && (
               <View style={styles.ingredientsSection}>
                 <Text style={styles.sheetHeading}>
-                  🛒 {isTelugu ? 'కావలసిన పదార్థాలు & కొలతలు:' : 'Ingredients & Exact Quantities Required:'}
+                  🛒 Ingredients & Exact Quantities Required:
                 </Text>
                 <View style={styles.ingredientsGrid}>
                   {analysisResult.ingredients.map((ing, idx) => (
@@ -208,9 +183,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
                           <Text style={styles.quantityBadgeText}>📏 {ing.quantity}</Text>
                         </View>
                         <TouchableOpacity style={styles.orderBtn} onPress={() => setOrderIngredient(ing)}>
-                          <Text style={styles.orderBtnText}>
-                            {isTelugu ? '🛍️ ఆర్డర్ చేయండి' : '🛍️ Not available? Order'}
-                          </Text>
+                          <Text style={styles.orderBtnText}>🛍️ Not available? Order</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -220,7 +193,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
             )}
 
             <Text style={styles.sheetHeading}>
-              🍳 {isTelugu ? 'తయారీ విధానం (Step-by-Step Guide):' : 'Step-by-Step Cooking Guidance:'}
+              🍳 Step-by-Step Cooking Guidance:
             </Text>
             {analysisResult.steps.map((step, idx) => (
               <View key={idx} style={styles.stepRow}>
