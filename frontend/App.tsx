@@ -17,12 +17,13 @@ import ProfileScreen from './screens/ProfileScreen';
 import DashboardScreen from './screens/DashboardScreen';
 import BottomNavBar, { TabType } from './components/BottomNavBar';
 import GlobalDishFinderScreen from './screens/GlobalDishFinderScreen';
+import GroceryDeliveryScreen from './screens/GroceryDeliveryScreen';
 
 
 export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userProfile, setUserProfile] = useState<any | null>(null);
-  const [currentScreen, setCurrentScreen] = useState<'scan_landing' | 'home' | 'scanner' | 'community' | 'voice' | 'health' | 'ayurveda' | 'profile' | 'recipes' | 'edit_preferences'>('home');
+  const [currentScreen, setCurrentScreen] = useState<'scan_landing' | 'home' | 'scanner' | 'community' | 'voice' | 'health' | 'ayurveda' | 'profile' | 'recipes' | 'edit_preferences' | 'grocery'>('home');
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [isShowingSplash, setIsShowingSplash] = useState(true);
@@ -269,12 +270,15 @@ export default function App() {
           } else if (targetScreen === 'recipes') {
             setActiveTab('recipes');
             setCurrentScreen('recipes');
+          } else if (targetScreen === 'grocery') {
+            setCurrentScreen('grocery');
           }
         }}
       />
     );
 
     if (currentScreen === 'recipes') return <GlobalDishFinderScreen />;
+    if (currentScreen === 'grocery') return <GroceryDeliveryScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
     if (currentScreen === 'profile') return (
       <ProfileScreen
         userProfile={userProfile}
@@ -285,7 +289,7 @@ export default function App() {
     );
     if (currentScreen === 'scanner') return <ScannerScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
     if (currentScreen === 'community') return <CommunityScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
-    if (currentScreen === 'voice') return <VoiceAssistantScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
+    if (currentScreen === 'voice') return <VoiceAssistantScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} onNavigateToGrocery={() => setCurrentScreen('grocery')} />;
     if (currentScreen === 'health' || currentScreen === 'ayurveda') return <HealthAndLeftoverScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
 
     return (

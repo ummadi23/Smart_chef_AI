@@ -22,63 +22,10 @@ interface YouTubeAnalysisResult {
   fullSummaryText: string;
 }
 
-function OrderSheet({
-  ingredient,
-  isTelugu,
-  onClose,
-}: {
-  ingredient: IngredientItem;
-  isTelugu: boolean;
-  onClose: () => void;
-}) {
-  const rawName = ingredient.name;
-  const englishName = rawName.includes('(')
-    ? rawName.slice(rawName.lastIndexOf('(') + 1, rawName.lastIndexOf(')'))
-    : rawName;
-  const searchQuery = encodeURIComponent(englishName.trim());
-
-  const stores = [
-    { name: 'Blinkit', icon: 'BLINKIT', color: '#FCE83A', bg: '#1A1A1A', url: `https://blinkit.com/s/?q=${searchQuery}` },
-    { name: 'BigBasket', icon: 'BIGBASKET', color: '#FFFFFF', bg: '#84C225', url: `https://www.bigbasket.com/ps/?q=${searchQuery}` },
-    { name: 'Zepto', icon: 'ZEPTO', color: '#FFFFFF', bg: '#8B5CF6', url: `https://www.zeptonow.com/search?query=${searchQuery}` },
-    { name: 'Amazon Fresh', icon: 'AMAZON', color: '#FFFFFF', bg: '#FF9900', url: `https://www.amazon.in/s?k=${searchQuery}+grocery` },
-  ];
-
-  const openStore = (url: string) => {
-    if (Platform.OS === 'web') { window.open(url, '_blank'); }
-    else { Linking.openURL(url); }
-  };
-
-  return (
-    <Modal transparent animationType="slide" onRequestClose={onClose}>
-      <View style={orderStyles.overlay}>
-        <View style={orderStyles.sheet}>
-          <View style={orderStyles.handle} />
-          <Text style={orderStyles.sheetTitle}>{isTelugu ? 'ఎక్కడ కొనాలి?' : 'Order Ingredient'}</Text>
-          <Text style={orderStyles.sheetSub}>"{ingredient.name}" – {ingredient.quantity}</Text>
-          {stores.map((store) => (
-            <TouchableOpacity key={store.name} style={[orderStyles.storeBtn, { backgroundColor: store.bg }]} onPress={() => openStore(store.url)}>
-              <View style={{ flex: 1 }}>
-                <Text style={[orderStyles.storeName, { color: store.color }]}>{store.name}</Text>
-                <Text style={[orderStyles.storeHint, { color: store.color }]}>{isTelugu ? 'నొక్కి ఆర్డర్ చేయండి' : 'Tap to order now'} →</Text>
-              </View>
-              <Text style={{ fontSize: 22, color: store.color }}>→</Text>
-            </TouchableOpacity>
-          ))}
-          <TouchableOpacity style={orderStyles.closeBtn} onPress={onClose}>
-            <Text style={orderStyles.closeBtnText}>{isTelugu ? 'మూసివేయి' : 'Close'}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-export default function VoiceAssistantScreen({ onBack }: { onBack: () => void }) {
+export default function VoiceAssistantScreen({ onBack, onNavigateToGrocery }: { onBack: () => void; onNavigateToGrocery?: (item?: string) => void }) {
   const [youtubeLink, setYoutubeLink] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<YouTubeAnalysisResult | null>(null);
-  const [orderIngredient, setOrderIngredient] = useState<IngredientItem | null>(null);
 
   const handleTranslateLink = async () => {
     if (!youtubeLink.trim()) {
@@ -108,10 +55,6 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
 
   return (
     <View style={styles.container}>
-      {orderIngredient && (
-        <OrderSheet ingredient={orderIngredient} isTelugu={false} onClose={() => setOrderIngredient(null)} />
-      )}
-
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>← Home</Text>
@@ -182,13 +125,16 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
                         <View style={styles.quantityBadge}>
                           <Text style={styles.quantityBadgeText}>📏 {ing.quantity}</Text>
                         </View>
-                        <TouchableOpacity style={styles.orderBtn} onPress={() => setOrderIngredient(ing)}>
-                          <Text style={styles.orderBtnText}>🛍️ Not available? Order</Text>
-                        </TouchableOpacity>
                       </View>
                     </View>
                   ))}
                 </View>
+
+                {onNavigateToGrocery && (
+                  <TouchableOpacity style={styles.groceryHubBtn} onPress={() => onNavigateToGrocery()}>
+                    <Text style={styles.groceryHubBtnTxt}>🛒 Need Missing Ingredients? Order via Blinkit, Zepto, BigBasket ➔</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -263,17 +209,6 @@ const styles = StyleSheet.create({
   stepBadge: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#FF6B6B', justifyContent: 'center', alignItems: 'center', marginRight: 12, marginTop: 2 },
   stepBadgeText: { color: '#FFF', fontSize: 12, fontWeight: '800' },
   stepInstructionText: { flex: 1, fontSize: 14, color: '#333', lineHeight: 22, fontWeight: '500' },
-});
-
-const orderStyles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' },
-  sheet: { backgroundColor: '#FFF', borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 28, paddingBottom: 48 },
-  handle: { width: 42, height: 5, borderRadius: 3, backgroundColor: '#E0E0E0', alignSelf: 'center', marginBottom: 20 },
-  sheetTitle: { fontSize: 22, fontWeight: '800', color: '#1A1A1A', marginBottom: 6 },
-  sheetSub: { fontSize: 14, color: '#666', marginBottom: 20, lineHeight: 20 },
-  storeBtn: { flexDirection: 'row', alignItems: 'center', borderRadius: 16, padding: 16, marginBottom: 12 },
-  storeName: { fontSize: 17, fontWeight: '800' },
-  storeHint: { fontSize: 12, fontWeight: '500', marginTop: 2, opacity: 0.8 },
-  closeBtn: { backgroundColor: '#F5F5F5', borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
-  closeBtnText: { fontSize: 15, fontWeight: '700', color: '#1A1A1A' },
+  groceryHubBtn: { backgroundColor: '#10B981', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 14, marginTop: 14, alignItems: 'center' },
+  groceryHubBtnTxt: { color: '#FFF', fontSize: 13, fontWeight: '800', textAlign: 'center' },
 });

@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 interface DashboardScreenProps {
   userProfile: any;
   userPreferences: any;
-  onNavigate: (screen: 'scan_landing' | 'scanner' | 'community' | 'voice' | 'health' | 'ayurveda' | 'recipes' | 'profile' | 'edit_preferences') => void;
+  onNavigate: (screen: 'scan_landing' | 'scanner' | 'community' | 'voice' | 'health' | 'ayurveda' | 'recipes' | 'profile' | 'edit_preferences' | 'grocery') => void;
 }
 
 export default function DashboardScreen({
@@ -231,6 +231,26 @@ export default function DashboardScreen({
             <Text style={styles.bentoSub}>Trending Foodie Recipes</Text>
           </TouchableOpacity>
         </View>
+
+        {/* 6. GROCERY DELIVERY HUB BANNER */}
+        <TouchableOpacity
+          style={[styles.heroBanner, { backgroundColor: '#064E3B', borderColor: '#059669', marginTop: 10 }]}
+          activeOpacity={0.9}
+          onPress={() => onNavigate('grocery')}
+        >
+          <View style={styles.heroContent}>
+            <View style={[styles.heroBadge, { backgroundColor: '#10B98122' }]}>
+              <Text style={[styles.heroBadgeText, { color: '#34D399' }]}>🛒 INSTANT GROCERY STORE</Text>
+            </View>
+            <Text style={styles.heroTitle}>Purchase Missing Groceries</Text>
+            <Text style={styles.heroSubtitle}>
+              Order missing ingredients directly via Blinkit, Zepto, Swiggy Instamart, BigBasket & Amazon Fresh!
+            </Text>
+            <View style={[styles.heroCtaBtn, { backgroundColor: '#10B981' }]}>
+              <Text style={[styles.heroCtaText, { color: '#FFF' }]}>Order Groceries Now ➔</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
 
         {/* 7. PREFERENCES BANNER */}
         <TouchableOpacity
