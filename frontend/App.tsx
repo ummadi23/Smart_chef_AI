@@ -156,7 +156,10 @@ export default function App() {
         return;
       }
 
-      const response = await fetch(`${getApiBaseUrl()}/api/auth/google`, {
+      const apiUrl = `${getApiBaseUrl()}/api/auth/google`;
+      console.log(`🔑 Attempting Google Login at: ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name, googleId })
@@ -168,8 +171,9 @@ export default function App() {
       } else {
         alert(json.message || 'Google Auth Failed.');
       }
-    } catch (err) {
-      alert('Google Auth connection failed. Ensure backend server is running.');
+    } catch (err: any) {
+      console.error('Google Auth Error:', err);
+      alert(`Google Auth failed: ${err.message || 'Ensure backend server is running on port 5000'}`);
     } finally {
       setIsLoadingSession(false);
     }
