@@ -301,13 +301,52 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 7. LOGOUT — invalidate token (Fixes L-003)
-// In production use Redis denylist; here we use a short token expiry (1d) as mitigation.
+// 8. GOOGLE AUTHENTICATION / SIGN-IN
 // ─────────────────────────────────────────────────────────────────────────────
-router.post('/logout', authMiddleware, (req, res) => {
-  // Client must delete the token from storage.
-  // For full revocation: add token jti to Redis denylist here.
-  res.json({ message: 'Logged out successfully. Please delete your token from local storage.' });
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name, googleId } = req.body;
+
+    if (!email || !isValidEmail(email.trim())) {
+      return res.status(400).json({ error: 'INVALID_EMAIL', message: 'Valid email is required for Google Sign-In.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const username = name || cleanEmail.split('@')[0];
+
+    let user = await User.findOne({ email: cleanEmail });
+    let isNewUser = false;
+
+    if (!user) {
+      isNewUser = true;
+      const dummyPassword = await bcrypt.hash(crypto.randomBytes(16).toString('hex'), 12);
+      user = new User({
+        username: username.trim(),
+        email: cleanEmail,
+        password: dummyPassword,
+        googleId: googleId || `google_${Date.now()}`,
+        preferences: { onboardingComplete: false }
+      });
+      await user.save();
+    }
+
+    const token = signToken(user._id, user.role || 'user');
+
+    res.json({
+      message: isNewUser ? 'Google account registered successfully!' : 'Google login successful!',
+      token,
+      isNewUser,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        preferences: user.preferences || {}
+      }
+    });
+
+  } catch (error) {
+    serverError(res, 'google-auth', error);
+  }
 });
 
 module.exports = router;
