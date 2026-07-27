@@ -456,23 +456,28 @@ Return ONLY valid JSON:
       return !itemsArr || !Array.isArray(itemsArr) || itemsArr.length < 2;
     };
 
-    // ── 1. TIER 1: Primary Provider (Google Gemini 1.5/2.0 Flash Vision) ──────
+    let rateLimitExceeded = false;
+
+    // ── 1. TIER 1: Primary Provider (Google Gemini 2.0/1.5 Flash Vision) ──────
     if (process.env.GEMINI_API_KEY) {
       try {
-        console.log('🤖 [TIER 1] Querying Google Gemini 1.5 Flash Vision API...');
+        console.log('🤖 [TIER 1] Querying Google Gemini 2.0 Flash Vision API...');
         const geminiRes = await callGeminiVisionApi(imageBase64, SCENE_AGNOSTIC_PROMPT);
         const geminiItems = parseItemList(geminiRes);
 
         if (!isWeakResult(geminiItems)) {
-          winningProvider = 'Google Gemini 1.5 Flash';
+          winningProvider = 'Google Gemini 2.0 Flash';
           finalItems = geminiItems;
           visionResult = geminiRes;
           console.log(`✅ [TIER 1 SUCCESS] Gemini Vision detected ${finalItems.length} items.`);
         } else {
-          console.log(`⚠️ [TIER 1 WEAK RESULT] Gemini returned ${geminiItems.length} items. Retrying against Secondary (GPT-4o Vision)...`);
+          console.log(`⚠️ [TIER 1 WEAK RESULT] Gemini returned ${geminiItems.length} items.`);
         }
       } catch (geminiErr) {
-        console.log(`⚠️ Tier 1 Gemini Vision error: ${geminiErr.message}. Retrying against Secondary (GPT-4o)...`);
+        console.log(`⚠️ Tier 1 Gemini Vision error: ${geminiErr.message}`);
+        if (geminiErr.message.includes('429')) {
+          rateLimitExceeded = true;
+        }
       }
     }
 
@@ -504,43 +509,29 @@ Return ONLY valid JSON:
           finalItems = gptItems;
           visionResult = gptRes;
           console.log(`✅ [TIER 2 SUCCESS] GPT-4o Vision detected ${finalItems.length} items.`);
-        } else {
-          console.log(`⚠️ [TIER 2 WEAK RESULT] GPT-4o returned ${gptItems.length} items. Retrying against Tertiary (OpenRouter Qwen)...`);
         }
       } catch (openAiErr) {
-        console.log(`⚠️ Tier 2 OpenAI Vision status: ${openAiErr.message}. Retrying against Tertiary...`);
-      }
-    }
-
-    // ── 3. TIER 3: Tertiary Provider (OpenRouter Free Vision API) ────────────
-    if (!winningProvider) {
-      try {
-        console.log('🤖 [TIER 3] Querying OpenRouter Multimodal Vision API...');
-        const openRouterRes = await callOpenRouterVisionApi(imageBase64, SCENE_AGNOSTIC_PROMPT);
-        const openRouterItems = parseItemList(openRouterRes);
-
-        if (openRouterItems.length > 0) {
-          winningProvider = 'OpenRouter Qwen 2 VL';
-          finalItems = openRouterItems;
-          visionResult = openRouterRes;
-          console.log(`✅ [TIER 3 SUCCESS] OpenRouter Qwen detected ${finalItems.length} items.`);
-        } else {
-          console.log('⚠️ [TIER 3 WEAK RESULT] OpenRouter returned 0 items. Falling back to Tier 4 Pixel Feature Analyzer...');
+        console.log(`⚠️ Tier 2 OpenAI Vision status: ${openAiErr.message}`);
+        if (openAiErr.message.includes('429')) {
+          rateLimitExceeded = true;
         }
-      } catch (openRouterErr) {
-        console.log(`⚠️ Tier 3 OpenRouter Vision skipped: ${openRouterErr.message}`);
       }
     }
 
-    // ── 4. TIER 4: Smart Image Content Pixel Feature Analyzer ─────────────────
-    if (!winningProvider) {
-      console.log('🤖 [TIER 4] Executing Scene-Agnostic Pixel Feature Audit Engine...');
-      visionResult = analyzePixelFeaturePayload(imageBase64, userLanguage);
-      finalItems = parseItemList(visionResult);
-      winningProvider = 'Smart Pixel Feature Inspector';
+    // If Rate Limit occurred and no real items returned, notify user cleanly without returning fake ingredients!
+    if (!winningProvider && rateLimitExceeded) {
+      return res.status(200).json({
+        status: 'error',
+        provider: 'API Rate Limit',
+        scannedCount: 0,
+        detectedIngredients: [],
+        items: [],
+        objects: [],
+        message: '⚠️ Gemini / OpenAI API Rate Limit Exceeded (HTTP 429). Please wait 60 seconds or generate a key in a NEW Google AI Studio project to resume real AI photo scanning!'
+      });
     }
 
-    // Extract objects with bounding boxes
+    // Format final response object
     let objectsDetected = [];
     if (visionResult && Array.isArray(visionResult.items)) {
       objectsDetected = visionResult.items.map(it => ({
@@ -552,11 +543,11 @@ Return ONLY valid JSON:
       objectsDetected = finalItems.map((name) => ({ name, score: 0.9, box: null }));
     }
 
-    console.log(`🏆 [VISION ENGINE WINNER] Provider: ${winningProvider} | Items Count: ${finalItems.length} | Detected: [${finalItems.join(', ')}]`);
+    console.log(`🏆 [VISION ENGINE WINNER] Provider: ${winningProvider || 'None'} | Items Count: ${finalItems.length} | Detected: [${finalItems.join(', ')}]`);
 
     return res.json({
       status: 'success',
-      provider: winningProvider,
+      provider: winningProvider || 'Photo Scanner',
       scannedCount: finalItems.length,
       detectedIngredients: finalItems,
       items: finalItems.map(name => ({ name, confidence: 'high' })),
@@ -565,7 +556,7 @@ Return ONLY valid JSON:
       category: visionResult?.category || 'Lunch / Dinner',
       cuisine: visionResult?.cuisine || 'Home Cooking',
       instructions: visionResult?.instructions || ['Prep all fresh ingredients.', 'Cook until tender and serve hot.'],
-      message: `✅ AI Vision (${winningProvider}) detected ${finalItems.length} items!`,
+      message: winningProvider ? `✅ AI Vision (${winningProvider}) detected ${finalItems.length} items!` : 'No ingredients detected. Please try a clearer photo or wait 60s.',
       data: visionResult
     });
 
