@@ -14,6 +14,7 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
 
   const popularIngredients = [
     { name: 'Fresh Chicken', emoji: '🍗' },
+    { name: 'Fresh Fish', emoji: '🐟' },
     { name: 'Paneer', emoji: '🧀' },
     { name: 'Red Tomatoes', emoji: '🍅' },
     { name: 'Whole Milk', emoji: '🥛' },
@@ -138,7 +139,7 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
               <TouchableOpacity
                 key={item.name}
                 style={[styles.chipCard, isSelected && styles.chipCardActive]}
-                onPress={() => setSearchItem(item.name)}
+                onPress={() => setSearchItem(isSelected ? '' : item.name)}
               >
                 <Text style={styles.chipEmoji}>{item.emoji}</Text>
                 <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>{item.name}</Text>
