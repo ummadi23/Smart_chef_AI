@@ -243,14 +243,14 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
           <View>
             <View style={s.leftoverHero}>
               <Text style={s.leftoverHeroTitle}>♻️ Leftover Makeover</Text>
-              <Text style={s.leftoverHeroSub}>Turn your fridge scraps into a gourmet dish — zero waste cooking!</Text>
+              <Text style={s.leftoverHeroSub}>Enter prepared food (e.g., Rasam, Dal, Rice, Roti) OR ingredients (e.g., Paneer, Eggs, Tomatoes). We'll turn them into a delicious zero-waste fusion dish!</Text>
             </View>
 
-            <Text style={s.inputLabel}>What leftovers do you have?</Text>
+            <Text style={s.inputLabel}>What leftover food or ingredients do you have?</Text>
             <View style={s.inputWrap}>
               <TextInput
                 style={[s.input, { minHeight: 60 }]}
-                placeholder="e.g., Leftover dal, stale roti, cooked rice, tomato curry..."
+                placeholder="e.g., Rasam, leftover dal, stale roti, cooked rice, boiled eggs..."
                 placeholderTextColor="#64748B"
                 value={leftoverText}
                 onChangeText={setLeftoverText}

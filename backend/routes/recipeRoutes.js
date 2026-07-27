@@ -1828,17 +1828,62 @@ const LEFTOVER_RECIPES = [
       'Serve hot with mint-yoghurt dip. Perfect party finger food from leftovers!',
     ]
   },
+  {
+    keywords: ['rasam', 'charu', 'saaru', 'sambar', 'sambhar', 'pulusu', 'kadhi', 'kadi'],
+    dish: 'Aromatic Rasam Rice / Sambar Comfort Bowl',
+    tags: ['🥣 Comfort Food', '⚡ 10 min', '♻️ Zero Waste'],
+    steps: [
+      'Warm your leftover rasam / sambar in a saucepan until gently simmering.',
+      'Add 1–2 cups of cooked rice (or leftover rice) directly into the hot rasam/sambar.',
+      'Stir well on medium heat for 2–3 minutes so the rice absorbs the tangy aromatic broth.',
+      'In a small pan, heat 1 tsp ghee, add 1/2 tsp mustard seeds, curry leaves, and a pinch of asafoetida (hing).',
+      'Pour this aromatic ghee tempering (tadka) over the rasam rice.',
+      'Serve steaming hot with papad, potato fry, or pickle!'
+    ]
+  },
+  {
+    keywords: ['chutney', 'thokku', 'pachadi', 'dip', 'pickle'],
+    dish: 'Tangy Chutney Rice / Paratha Spread',
+    tags: ['🌶️ Zesty', '⚡ 8 min', '♻️ Zero Waste'],
+    steps: [
+      'Heat 1 tbsp oil or ghee in a pan on medium heat.',
+      'Add 1/2 tsp cumin seeds and 1 finely chopped onion. Sauté until translucent.',
+      'Add 2–3 tbsp of your leftover chutney (mint, tomato, coconut, or coriander).',
+      'Toss in 2 cups of leftover cooked rice and stir gently to coat every grain.',
+      'Season with a pinch of salt and a squeeze of fresh lemon juice.',
+      'Serve warm with yogurt or raita for a quick 8-minute meal!'
+    ]
+  },
 ];
 
 // Fallback when nothing matches
 function generateGenericRecipe(ingredients) {
   const items = ingredients.split(',').map(s => s.trim()).filter(Boolean);
   const mainItem = items[0] || 'mixed ingredients';
+  const lowerMain = mainItem.toLowerCase();
+  
+  const isLiquid = ['rasam', 'sambar', 'soup', 'dal', 'curry', 'gravy', 'sauce', 'broth', 'pulusu', 'kadhi', 'kadi', 'korma', 'stew'].some(k => lowerMain.includes(k));
+
+  if (isLiquid) {
+    return {
+      dish: `${mainItem.charAt(0).toUpperCase() + mainItem.slice(1)} Fusion Rice Bowl`,
+      tags: ['🥣 Comfort Fix', '⚡ 10 min', '♻️ Zero Waste'],
+      steps: [
+        `Heat your leftover ${mainItem} in a saucepan on medium flame until hot.`,
+        'Add 1.5 cups cooked rice (or leftover rice) directly into the simmering sauce/gravy.',
+        'Stir gently for 2 minutes until the rice absorbs the rich flavours.',
+        'Heat 1 tsp ghee/oil in a small pan, add mustard seeds and curry leaves for tempering.',
+        'Pour the ghee tempering over the rice bowl.',
+        'Serve hot with papad, yogurt, or fresh coriander garnish!'
+      ]
+    };
+  }
+
   return {
     dish: `${mainItem.charAt(0).toUpperCase() + mainItem.slice(1)} Stir-Fry`,
     tags: ['🍳 Quick Fix', '⚡ 15 min', '♻️ Zero Waste'],
     steps: [
-      `Prep all your leftovers: chop or slice ${items.join(', ')} into bite-sized pieces.`,
+      `Prep your leftovers: chop or slice ${items.join(', ')} into bite-sized pieces.`,
       'Heat 2 tbsp oil in a wide pan or wok on high flame.',
       'Add 1 tsp garlic and 1 tsp ginger. Stir-fry for 30 seconds until fragrant.',
       `Add your ${mainItem} and any other leftover items to the pan. Toss on high heat.`,
