@@ -173,18 +173,18 @@ export default function DashboardScreen({
         <Text style={styles.sectionHeading}>Smart Kitchen Modules</Text>
 
         <View style={styles.bentoGrid}>
-          {/* Module 1: Ayurvedic Dosha */}
+          {/* Module 1: Ayurvedic Remedies */}
           <TouchableOpacity
             style={[styles.bentoCard, { backgroundColor: '#ECFDF5', borderColor: '#A7F3D0' }]}
-            onPress={() => onNavigate('ayurveda')}
+            onPress={() => onNavigate('health')}
             activeOpacity={0.85}
           >
             <View style={styles.bentoHeader}>
               <Text style={styles.bentoEmoji}>🌿</Text>
               <Text style={styles.bentoArrow}>›</Text>
             </View>
-            <Text style={styles.bentoTitle}>Ayurvedic Balancer</Text>
-            <Text style={styles.bentoSub}>Dosha & Heating/Cooling Food Guide</Text>
+            <Text style={styles.bentoTitle}>Ayurvedic Remedies</Text>
+            <Text style={styles.bentoSub}>Ancient Cures for Cough, Cold & Health</Text>
           </TouchableOpacity>
 
           {/* Module 2: Leftovers Rescue */}

@@ -36,7 +36,7 @@ export default function App() {
     if (tab === 'home') setCurrentScreen('home');
     else if (tab === 'scan') setCurrentScreen('scan_landing');
     else if (tab === 'youtube') setCurrentScreen('voice');
-    else if (tab === 'ayurveda') setCurrentScreen('ayurveda');
+    else if (tab === 'ayurveda') setCurrentScreen('health');
     else if (tab === 'leftovers') setCurrentScreen('health');
     else if (tab === 'community') setCurrentScreen('community');
     else if (tab === 'profile') setCurrentScreen('profile');
@@ -286,8 +286,7 @@ export default function App() {
     if (currentScreen === 'scanner') return <ScannerScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
     if (currentScreen === 'community') return <CommunityScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
     if (currentScreen === 'voice') return <VoiceAssistantScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
-    if (currentScreen === 'health') return <HealthAndLeftoverScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
-    if (currentScreen === 'ayurveda') return <AyurvedicScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
+    if (currentScreen === 'health' || currentScreen === 'ayurveda') return <HealthAndLeftoverScreen onBack={() => { setActiveTab('home'); setCurrentScreen('home'); }} />;
 
     return (
       <ScanYourFridgeLandingScreen
