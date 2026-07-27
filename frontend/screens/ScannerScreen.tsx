@@ -339,7 +339,7 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
           <View style={styles.lensViewfinderBox}>
             {fridgePhotoUri ? (
               <View style={styles.previewImageContainer}>
-                <Image source={{ uri: fridgePhotoUri }} style={styles.viewfinderImage} resizeMode="cover" />
+                <Image source={{ uri: fridgePhotoUri }} style={styles.viewfinderImage} resizeMode="contain" />
 
                 {/* HUD Bounding Corner Overlays */}
                 <View style={[styles.hudCorner, styles.hudTopLeft]} />
@@ -1061,8 +1061,8 @@ const styles = StyleSheet.create({
   // Google Lens HUD Viewfinder Box
   lensViewfinderBox: {
     width: '100%',
-    height: 220,
-    backgroundColor: '#1E293B',
+    height: 420,
+    backgroundColor: '#090D16',
     borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 1,
