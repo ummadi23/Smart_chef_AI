@@ -203,18 +203,18 @@ export default function DashboardScreen({
         </View>
 
         <View style={styles.bentoGrid}>
-          {/* Module 3: YouTube Voice Guide */}
+          {/* Module 3: YouTube Recipe AI */}
           <TouchableOpacity
             style={[styles.bentoCard, { backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' }]}
             onPress={() => onNavigate('voice')}
             activeOpacity={0.85}
           >
             <View style={styles.bentoHeader}>
-              <Text style={styles.bentoEmoji}>🎙️</Text>
+              <Text style={styles.bentoEmoji}>📹</Text>
               <Text style={styles.bentoArrow}>›</Text>
             </View>
-            <Text style={styles.bentoTitle}>Voice Recipe Assistant</Text>
-            <Text style={styles.bentoSub}>Hands-Free YouTube Cooking</Text>
+            <Text style={styles.bentoTitle}>YouTube Recipe AI</Text>
+            <Text style={styles.bentoSub}>Extract Ingredients & Steps from YouTube</Text>
           </TouchableOpacity>
 
           {/* Module 4: Community Feed */}

@@ -78,31 +78,10 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
   const [youtubeLink, setYoutubeLink] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<'English' | 'Telugu'>('English');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<YouTubeAnalysisResult | null>(null);
   const [orderIngredient, setOrderIngredient] = useState<IngredientItem | null>(null);
 
   const isTelugu = selectedLanguage === 'Telugu';
-
-  // ── Preload voices as soon as component mounts ──────────────────────────
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
-
-  useEffect(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined' || !window.speechSynthesis) return;
-
-    const loadVoices = () => {
-      const v = window.speechSynthesis.getVoices();
-      if (v.length > 0) setAvailableVoices(v);
-    };
-
-    loadVoices(); // may already be populated in some browsers
-    window.speechSynthesis.onvoiceschanged = loadVoices; // fires when voices are ready
-
-    return () => {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, []);
 
   const handleTranslateLink = async () => {
     if (!youtubeLink.trim()) {
@@ -114,8 +93,6 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
     }
     setIsProcessing(true);
     setAnalysisResult(null);
-    if (Platform.OS === 'web' && window.speechSynthesis) window.speechSynthesis.cancel();
-    setIsPlayingAudio(false);
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/recipes/analyze-youtube`, {
         method: 'POST',
@@ -135,73 +112,6 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
     }
   };
 
-  // ── Speak with correct language voice ────────────────────────────────────
-  const toggleVoiceAssistant = async () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-
-    if (isPlayingAudio) {
-      window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
-      return;
-    }
-    if (!analysisResult) return;
-    window.speechSynthesis.cancel();
-
-    // Keep Telugu Unicode (\u0C00-\u0C7F) + ASCII, strip only emoji
-    const cleanText = analysisResult.fullSummaryText
-      .replace(/[\u{1F000}-\u{1FFFF}]/gu, '') // strip emoji
-      .trim();
-
-    // Wait up to 2 s for voices to be populated
-    let voices = availableVoices.length > 0
-      ? availableVoices
-      : await new Promise<SpeechSynthesisVoice[]>((resolve) => {
-          let tries = 0;
-          const interval = setInterval(() => {
-            const v = window.speechSynthesis.getVoices();
-            if (v.length > 0 || ++tries > 20) {
-              clearInterval(interval);
-              if (v.length > 0) setAvailableVoices(v);
-              resolve(v);
-            }
-          }, 100);
-        });
-
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.rate = 0.85;
-    utterance.pitch = 1;
-
-    if (isTelugu) {
-      utterance.lang = 'te-IN';
-      // Prefer native te-IN; fall back to any Telugu; fall back to en-IN for pronunciation
-      const teVoice =
-        voices.find((v) => v.lang === 'te-IN') ||
-        voices.find((v) => v.lang.startsWith('te')) ||
-        voices.find((v) => v.lang === 'hi-IN') || // Hindi as closest Indic fallback
-        voices.find((v) => v.lang.startsWith('en'));
-      if (teVoice) {
-        utterance.voice = teVoice;
-        console.log('Using voice:', teVoice.name, teVoice.lang);
-      }
-    } else {
-      utterance.lang = 'en-IN';
-      const enVoice =
-        voices.find((v) => v.lang === 'en-IN') ||
-        voices.find((v) => v.lang === 'en-US') ||
-        voices.find((v) => v.lang.startsWith('en'));
-      if (enVoice) utterance.voice = enVoice;
-    }
-
-    utterance.onend = () => setIsPlayingAudio(false);
-    utterance.onerror = (e) => { console.warn('Speech error:', e); setIsPlayingAudio(false); };
-
-    // Chrome quirk: call speak() after a tiny delay to avoid silent failure
-    setTimeout(() => {
-      window.speechSynthesis.speak(utterance);
-    }, 50);
-    setIsPlayingAudio(true);
-  };
-
   return (
     <View style={styles.container}>
       {orderIngredient && (
@@ -212,7 +122,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <Text style={styles.backButtonText}>← Home</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>AI Voice Assistant</Text>
+        <Text style={styles.headerTitle}>YouTube Recipe AI</Text>
         <View style={{ width: 60 }} />
       </View>
 
@@ -233,7 +143,7 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
           />
         </View>
 
-        <Text style={styles.sectionLabel}>{isTelugu ? 'భాష ఎంచుకోండి:' : 'Select Voice Language:'}</Text>
+        <Text style={styles.sectionLabel}>{isTelugu ? 'భాష ఎంచుకోండి:' : 'Select Recipe Output Language:'}</Text>
         <View style={styles.languageContainer}>
           {(['English', 'Telugu'] as const).map((lang) => (
             <TouchableOpacity
@@ -283,15 +193,6 @@ export default function VoiceAssistantScreen({ onBack }: { onBack: () => void })
               <Text style={styles.videoTitleText}>📽️ {analysisResult.videoTitle}</Text>
               {analysisResult.authorName && <Text style={styles.channelNameText}>By {analysisResult.authorName}</Text>}
             </View>
-
-            <TouchableOpacity style={[styles.voiceCard, isPlayingAudio && styles.voiceCardPlaying]} onPress={toggleVoiceAssistant}>
-              <Text style={styles.voiceIcon}>{isPlayingAudio ? '🔊' : '🔈'}</Text>
-              <Text style={styles.voiceText}>
-                {isPlayingAudio
-                  ? (isTelugu ? 'ఆపడానికి నొక్కండి' : 'Click to Pause Voice Readout')
-                  : (isTelugu ? 'తెలుగులో వినుటకు నొక్కండి' : 'Click to Start Hands-Free Audio Readout')}
-              </Text>
-            </TouchableOpacity>
 
             {analysisResult.ingredients && analysisResult.ingredients.length > 0 && (
               <View style={styles.ingredientsSection}>
