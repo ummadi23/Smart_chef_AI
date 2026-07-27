@@ -419,9 +419,9 @@ router.post('/scan-fridge', (req, res, next) => {
       });
     }
 
-    console.log(`🔍 [FRIDGE VISION SCANNER] Processing photo payload frame (${imageBase64.length} bytes, Lang: ${userLanguage})`);
+    console.log(`🔍 [INGREDIENT PHOTO VISION SCANNER] Processing photo payload frame (${imageBase64.length} bytes, Lang: ${userLanguage})`);
 
-    const SCENE_AGNOSTIC_PROMPT = `You are looking at an image that may show a refrigerator interior, a kitchen countertop, a table with groceries, or any collection of food items — the setting can vary. Identify EVERY distinct food item visible in the image, regardless of the photo's source, quality, lighting, or framing. This includes fruits, vegetables, meat, dairy, eggs, packaged goods, jars, bottles, and condiments — whether they are the main subject or partially visible/in the background. Do not assume this must look like a phone photo of a real fridge — treat any image type the same way. Base your answer only on what is visibly identifiable; do not guess items that aren't present. Return ONLY valid JSON:
+    const SCENE_AGNOSTIC_PROMPT = `You are looking at an image showing a collection of food items and ingredients placed together — on a kitchen countertop, table, plate, cutting board, tray, or inside a pantry/fridge. Identify EVERY distinct food item and ingredient visible in the photo. This includes vegetables, fruits, herbs, meat, poultry, dairy, eggs, grains, spices, oils, packaged goods, and condiments — whether they are arranged together, spread out, or partially overlapping. Base your answer strictly on what is visibly identifiable in the image. Return ONLY valid JSON:
 { "items": [ { "name": "...", "confidence": "high|medium|low" } ] }
 If no food items are identifiable, return { "items": [] }.`;
 

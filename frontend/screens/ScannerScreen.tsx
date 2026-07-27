@@ -104,8 +104,8 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
     setResult(null); // Clear previous recipe suggestions immediately
     setFridgeScanMessage(
       language === 'Telugu'
-        ? '🔍 AI విజన్ ఫ్రిజ్ ఇమేజ్ విశ్లేషిస్తోంది... (ఇది 20-30 సెకన్లు పట్టవచ్చు)'
-        : '🔍 AI Vision Analyzing Your Fridge Photo... (this can take up to 30 seconds)'
+        ? '🔍 AI విజన్ పదార్థాల ఫోటోని విశ్లేషిస్తోంది... (ఇది 20-30 సెకన్లు పట్టవచ్చు)'
+        : '🔍 AI Vision Analyzing Your Ingredients Photo... (this can take up to 30 seconds)'
     );
 
     const controller = new AbortController();
@@ -359,14 +359,14 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
         <View style={styles.fridgeCard}>
           <View style={styles.fridgeTopRow}>
             <View style={styles.fridgeBadge}>
-              <Text style={styles.fridgeBadgeText}>⚡ GOOGLE LENS AI DETECTOR</Text>
+              <Text style={styles.fridgeBadgeText}>⚡ AI INGREDIENT PHOTO VISION</Text>
             </View>
             <Text style={styles.fridgeIcon}>🎯</Text>
           </View>
 
-          <Text style={styles.fridgeTitle}>Scan Inside Your Fridge</Text>
+          <Text style={styles.fridgeTitle}>Scan Your Ingredients Photo</Text>
           <Text style={styles.fridgeSub}>
-            Google Lens style AI camera detects every ingredient in your fridge with 100% pixel accuracy.
+            Place all your available ingredients together in one spot (table, countertop, or plate) and snap a photo. Our AI vision detects every item and suggests recipes instantly!
           </Text>
 
           {/* AI Camera Viewfinder Box */}
@@ -442,7 +442,7 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
                   style={styles.retakeOverlayBtn}
                   onPress={() => { setFridgePhotoUri(null); setIngredients([]); setResult(null); setFridgeScanMessage(null); }}
                 >
-                  <Text style={styles.retakeOverlayText}>✕ Retake Scan</Text>
+                  <Text style={styles.retakeOverlayText}>✕ Retake Photo</Text>
                 </TouchableOpacity>
               </View>
             ) : (
@@ -450,7 +450,7 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
                 <View style={styles.laserScanLine} />
                 <Text style={styles.hudIconText}>📷</Text>
                 <Text style={styles.hudTitleText}>AI Lens Viewfinder Ready</Text>
-                <Text style={styles.hudSubText}>Align fridge or pantry contents within frame</Text>
+                <Text style={styles.hudSubText}>Lay out all your ingredients together in frame</Text>
               </View>
             )}
 
@@ -458,7 +458,7 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
               <View style={styles.scanningOverlay}>
                 <ActivityIndicator color="#22C55E" size="large" />
                 <Text style={styles.scanningStatusText}>
-                  {fridgeScanMessage || '🔍 AI Lens Scanning Object Pixels...'}
+                  {fridgeScanMessage || '🔍 AI Lens Scanning Ingredient Pixels...'}
                 </Text>
               </View>
             )}
@@ -467,7 +467,7 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
           {/* Photo Upload / Camera Shutter Row */}
           <View style={styles.fridgeBtnRow}>
             <TouchableOpacity style={styles.scanCameraBtn} onPress={takeLiveFridgePhoto}>
-              <Text style={styles.scanCameraBtnText}>📸 SNAP FRIDGE</Text>
+              <Text style={styles.scanCameraBtnText}>📸 SNAP INGREDIENTS</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.uploadGalleryBtn} onPress={pickFridgeGalleryPhoto}>
               <Text style={styles.uploadGalleryBtnText}>🖼️ GALLERY</Text>

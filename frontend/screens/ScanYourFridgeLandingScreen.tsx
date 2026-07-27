@@ -30,10 +30,10 @@ export default function ScanYourFridgeLandingScreen({
           </View>
         </View>
 
-        {/* Title & Subtitle Matching Screenshot */}
-        <Text style={styles.titleText}>Scan Your Fridge</Text>
+        {/* Title & Subtitle */}
+        <Text style={styles.titleText}>Scan Your Ingredients Photo</Text>
         <Text style={styles.subtitleText}>
-          Take a photo of your fridge or pantry and we'll find the best recipes from what you have.
+          Gather all your available ingredients together in one place, snap a quick photo, and get instant recipes!
         </Text>
       </View>
 
@@ -44,7 +44,7 @@ export default function ScanYourFridgeLandingScreen({
           activeOpacity={0.85}
           onPress={onStartScan}
         >
-          <Text style={styles.startScanButtonText}>Start Scan</Text>
+          <Text style={styles.startScanButtonText}>📸 Snap Ingredients Photo</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

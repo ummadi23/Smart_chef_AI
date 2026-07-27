@@ -133,15 +133,15 @@ export default function DashboardScreen({
         >
           <View style={styles.heroContent}>
             <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>🤖 AI FRIDGE VISION</Text>
+              <Text style={styles.heroBadgeText}>🤖 AI INGREDIENT PHOTO VISION</Text>
             </View>
-            <Text style={styles.heroTitle}>What's inside your fridge today?</Text>
+            <Text style={styles.heroTitle}>Snap your available ingredients</Text>
             <Text style={styles.heroSubtitle}>
-              Scan ingredients to get instant 15-minute recipes tailored to your pantry.
+              Place all your available ingredients together in one spot and snap a photo to get instant recipes.
             </Text>
 
             <View style={styles.heroCtaBtn}>
-              <Text style={styles.heroCtaText}>📸 Scan Ingredients Now</Text>
+              <Text style={styles.heroCtaText}>📸 Snap Ingredients Photo</Text>
             </View>
           </View>
           <Text style={styles.heroBgEmoji}>🥑</Text>
