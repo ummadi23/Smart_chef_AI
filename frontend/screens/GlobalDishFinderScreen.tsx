@@ -16,18 +16,161 @@ export default function GlobalDishFinderScreen() {
     const [selectedDish, setSelectedDish] = useState<Recipe | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const generateDishVarieties = (queryStr: string): Recipe[] => {
+    const generateIndianDishVarieties = (queryStr: string): Recipe[] => {
         const q = queryStr.trim();
         const qLower = q.toLowerCase();
         const titleCase = q.charAt(0).toUpperCase() + q.slice(1);
 
+        // 1. BIRYANI VARIETIES
+        if (qLower.includes('biryani') || qLower.includes('briyani') || qLower.includes('pulao')) {
+            return [
+                {
+                    id: 'b1',
+                    title: 'Hyderabadi Chicken Dum Biryani',
+                    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600',
+                    ingredients: ['500g Chicken (curry cut)', '2 cups Long-grain Basmati Rice', '1 cup Thick Curd / Yoghurt', '2 tbsp Desi Ghee', '2 Sliced Onions (fried golden)', '1 tbsp Ginger-Garlic Paste', '1 tsp Biryani Masala', 'Saffron milk & Mint leaves'],
+                    instructions: [
+                        'Step 1: Marinate chicken with curd, ginger-garlic paste, biryani masala, red chilli, and salt for 45 minutes.',
+                        'Step 2: Boil 2 cups Basmati rice with whole spices (bay leaf, cloves, cardamom) until 70% cooked; drain water.',
+                        'Step 3: Layer marinated chicken at the bottom of a heavy handi, top with cooked rice, golden fried onions, saffron milk, and mint leaves.',
+                        'Step 4: Seal the vessel with dough or a tight lid and cook on low dum heat for 25 minutes.',
+                        'Step 5: Mix gently from the bottom and serve piping hot with Mirchi Ka Salan and Raita!'
+                    ]
+                },
+                {
+                    id: 'b2',
+                    title: 'Lucknowi Awadhi Chicken Biryani',
+                    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600',
+                    ingredients: ['500g Chicken', '2 cups Aged Basmati Rice', '½ cup Warm Milk with Kewra water', '2 tbsp Pure Ghee', 'Whole Spices (Mace, Star Anise, Cardamom)', 'Golden Fried Onions'],
+                    instructions: [
+                        'Step 1: Parboil chicken in aromatic spiced stock until 80% tender.',
+                        'Step 2: Layer fragrant Basmati rice over the tender chicken in a clay handi.',
+                        'Step 3: Drizzle pure ghee, milk infused with saffron, and a drop of Kewra water.',
+                        'Step 4: Seal handi with dough and dum-cook on low flame for 20 minutes.',
+                        'Step 5: Serve delicate, aromatic Awadhi biryani with cucumber raita!'
+                    ]
+                },
+                {
+                    id: 'b3',
+                    title: 'Kolkata Mutton Biryani (with Egg & Potato)',
+                    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600',
+                    ingredients: ['500g Mutton', '2 Large Potatoes (halved & fried)', '2 Boiled Eggs', '2 cups Basmati Rice', 'Meetha Attar (Biryani aroma)', 'Ghee & Golden Onions'],
+                    instructions: [
+                        'Step 1: Pressure cook mutton with yoghurt, ginger, garlic, and Kolkata biryani spices until soft.',
+                        'Step 2: Fry large potato halves and boiled eggs in ghee until golden.',
+                        'Step 3: Layer mutton gravy, golden potatoes, boiled eggs, and parboiled rice in a vessel.',
+                        'Step 4: Drizzle Meetha Attar, saffron, and ghee; dum cook for 20 minutes.',
+                        'Step 5: Enjoy authentic Kolkata style biryani with soft flavorful potatoes!'
+                    ]
+                },
+                {
+                    id: 'b4',
+                    title: 'Malabar Fish Biryani (Kerala Style)',
+                    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600',
+                    ingredients: ['400g King Fish / Seer Fish steaks', '2 cups Kaima / Jeerakasala Rice', '2 tbsp Coconut Oil', 'Fried Cashews & Raisins', 'Green Chilli Garlic Paste', 'Curry Leaves'],
+                    instructions: [
+                        'Step 1: Shallow fry fish steaks marinated in turmeric and chilli powder.',
+                        'Step 2: Cook short-grain Kaima rice with ghee and whole spices.',
+                        'Step 3: Prepare onion-tomato green chilli masala in coconut oil.',
+                        'Step 4: Layer fried fish, onion masala, cooked rice, and top with golden cashews & raisins.',
+                        'Step 5: Dum cook for 15 minutes and serve with Kerala coconut chammanthi!'
+                    ]
+                },
+                {
+                    id: 'b5',
+                    title: 'Chettinad Spicy Veg Dum Biryani',
+                    image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600',
+                    ingredients: ['1 cup Mixed Vegetables (Carrots, Beans, Peas, Potato)', '2 cups Basmati Rice', '2 tbsp Chettinad Masala (fennel, pepper, kapok bud)', '1 cup Coconut Milk', 'Ghee & Mint'],
+                    instructions: [
+                        'Step 1: Sauté mixed vegetables with freshly ground Chettinad spice masala.',
+                        'Step 2: Cook Basmati rice in coconut milk and water until 75% done.',
+                        'Step 3: Layer Chettinad veg gravy and coconut rice in a pan.',
+                        'Step 4: Dum cook for 15 minutes on low flame.',
+                        'Step 5: Serve hot with spicy onion pachadi!'
+                    ]
+                }
+            ];
+        }
+
+        // 2. CHICKEN VARIETIES
+        if (qLower.includes('chicken') || qLower.includes('murg')) {
+            return [
+                {
+                    id: 'c1',
+                    title: 'Butter Chicken (Murgh Makhani)',
+                    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600',
+                    ingredients: ['500g Chicken (grilled tikka)', '3 tbsp Butter', '2 tbsp Fresh Cream', '2 cups Tomato Puree', '1 tbsp Cashew Paste', '1 tsp Kasuri Methi', '1 tsp Garam Masala'],
+                    instructions: [
+                        'Step 1: Marinate chicken in curd and tandoori masala; grill or pan-sear until golden.',
+                        'Step 2: Melt butter in a pan, add tomato puree and cashew paste; simmer for 10 minutes.',
+                        'Step 3: Add grilled chicken pieces into the creamy gravy.',
+                        'Step 4: Swirl in heavy cream and crushed Kasuri Methi.',
+                        'Step 5: Serve rich butter chicken hot with butter naan!'
+                    ]
+                },
+                {
+                    id: 'c2',
+                    title: 'Chicken Tikka Masala (Smoky Tandoori Curry)',
+                    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600',
+                    ingredients: ['500g Boneless Chicken', '1 cup Hung Curd', '1 Onion (chopped)', '1 Tomato Puree', '1 tbsp Mustard Oil', 'Tandoori & Garam Masala'],
+                    instructions: [
+                        'Step 1: Marinate chicken cubes in hung curd and mustard oil for 1 hour; sear on tawa.',
+                        'Step 2: Prepare a thick onion-tomato spiced gravy in a skillet.',
+                        'Step 3: Add seared chicken tikka into the gravy and simmer for 5 minutes.',
+                        'Step 4: Infuse with charcoal smoke for authentic tandoori aroma.',
+                        'Step 5: Garnish with fresh coriander and serve hot!'
+                    ]
+                },
+                {
+                    id: 'c3',
+                    title: 'Kadhai Chicken (Spicy Dhaba Style)',
+                    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600',
+                    ingredients: ['500g Bone-in Chicken', '1 Diced Bell Pepper (Capsicum)', '1 Diced Onion', '2 tbsp Fresh Kadhai Masala', '2 Tomatoes', '1 tbsp Ghee'],
+                    instructions: [
+                        'Step 1: Coarsely grind roasted coriander seeds and whole red chillies to make Kadhai Masala.',
+                        'Step 2: Sauté chicken in ghee until white; add tomato paste and Kadhai Masala.',
+                        'Step 3: Toss in crunchy diced bell peppers and onions.',
+                        'Step 4: Cook on high flame for 8 minutes until chicken is tender.',
+                        'Step 5: Garnish with fresh ginger juliennes and serve with rumali roti!'
+                    ]
+                },
+                {
+                    id: 'c4',
+                    title: 'Chettinad Spicy Pepper Chicken',
+                    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600',
+                    ingredients: ['500g Chicken', '2 tbsp Black Peppercorns (ground)', '1 tsp Fennel seeds', '10 Shallots (Small onions)', '2 Sprigs Curry Leaves', 'Gingelly Oil'],
+                    instructions: [
+                        'Step 1: Heat gingelly oil, temper fennel seeds, curry leaves, and small shallots.',
+                        'Step 2: Add chicken, turmeric, salt, and freshly ground black pepper powder.',
+                        'Step 3: Sauté on medium flame until chicken releases juices and turns dark brown.',
+                        'Step 4: Cook dry or with slight gravy for 15 minutes.',
+                        'Step 5: Serve hot with steamed rice or parotta!'
+                    ]
+                },
+                {
+                    id: 'c5',
+                    title: 'Andhra Kodi Kura (Spicy Spicy Chicken Curry)',
+                    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600',
+                    ingredients: ['500g Chicken', '2 tbsp Guntur Red Chilli Powder', '1 tbsp Poppy seeds (Gasa Gasa paste)', '1 Coconut slice (grated)', 'Ghee & Curry Leaves'],
+                    instructions: [
+                        'Step 1: Make a paste of poppy seeds, coconut, and roasted spices.',
+                        'Step 2: Sauté onions, green chillies, and ginger-garlic paste in ghee.',
+                        'Step 3: Add chicken, Guntur red chilli powder, and poppy paste.',
+                        'Step 4: Cook until chicken is tender and oil floats on top.',
+                        'Step 5: Serve spicy Kodi Kura with steamed rice or ragi mudde!'
+                    ]
+                }
+            ];
+        }
+
+        // 3. PANEER VARIETIES
         if (qLower.includes('paneer')) {
             return [
                 {
                     id: 'p1',
                     title: 'Paneer Butter Masala (Rich & Creamy)',
                     image: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=600',
-                    ingredients: ['250g Paneer cubes', '2 Tomatoes (pureed)', '1 Onion (chopped)', '1 tbsp Butter', '2 tbsp Heavy Cream', '1 tsp Kasuri Methi', '1 tsp Garam Masala', '½ tsp Red Chilli Powder'],
+                    ingredients: ['250g Paneer cubes', '2 Tomatoes (pureed)', '1 Onion (chopped)', '1 tbsp Butter', '2 tbsp Heavy Cream', '1 tsp Kasuri Methi', '1 tsp Garam Masala'],
                     instructions: [
                         'Step 1: Melt 1 tbsp butter in a pan and sauté chopped onions until golden brown.',
                         'Step 2: Add tomato puree, ginger-garlic paste, red chilli powder, and salt. Cook for 6 minutes until oil separates.',
@@ -104,7 +247,8 @@ export default function GlobalDishFinderScreen() {
             ];
         }
 
-        if (qLower.includes('dosa')) {
+        // 4. DOSA / TIFFIN VARIETIES
+        if (qLower.includes('dosa') || qLower.includes('dosai')) {
             return [
                 {
                     id: 'd1',
@@ -161,83 +305,142 @@ export default function GlobalDishFinderScreen() {
             ];
         }
 
+        // 5. DAL / LENTIL VARIETIES
+        if (qLower.includes('dal') || qLower.includes('daal') || qLower.includes('lentil') || qLower.includes('pappu')) {
+            return [
+                {
+                    id: 'dl1',
+                    title: 'Punjabi Dal Tadka (Dhaba Style)',
+                    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600',
+                    ingredients: ['1 cup Toor Dal (Pigeon Peas)', '2 tbsp Desi Ghee', '1 tsp Cumin Seeds', '4 Garlic cloves (chopped)', '2 Whole Dry Red Chillies', '1 Pinch Hing (Asafoetida)', '1 Tomato'],
+                    instructions: [
+                        'Step 1: Pressure cook 1 cup Toor Dal with turmeric, salt, and water for 4 whistles until soft.',
+                        'Step 2: Heat ghee in a pan, sauté chopped onions, ginger, and tomatoes until soft; mix into cooked dal.',
+                        'Step 3: For authentic Tadka: heat 1 tbsp ghee in a small pan, add cumin seeds, hing, chopped garlic, and dry red chillies.',
+                        'Step 4: Pour the sizzling tadka over the dal and cover with lid immediately to trap aromas.',
+                        'Step 5: Garnish with fresh cilantro and serve hot with jeera rice!'
+                    ]
+                },
+                {
+                    id: 'dl2',
+                    title: 'Dal Makhani (Velvet Slow-Cooked Black Dal)',
+                    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600',
+                    ingredients: ['1 cup Whole Black Urad Dal', '¼ cup Rajma (Kidney beans)', '3 tbsp Butter', '2 tbsp Fresh Cream', '1 cup Tomato Puree', '1 tsp Kashmiri Chilli', 'Kasuri Methi'],
+                    instructions: [
+                        'Step 1: Soak black urad dal and rajma overnight; pressure cook for 7-8 whistles until ultra soft.',
+                        'Step 2: Mash lentils slightly with a whisk or back of a spoon.',
+                        'Step 3: Heat butter in a pot, cook tomato puree with ginger-garlic paste and Kashmiri chilli powder.',
+                        'Step 4: Add cooked lentils and simmer on low flame for 45 minutes, adding butter and water as needed.',
+                        'Step 5: Swirl in heavy cream, crushed Kasuri Methi, and serve rich Dal Makhani with butter naan!'
+                    ]
+                },
+                {
+                    id: 'dl3',
+                    title: 'Bengali Cholar Dal with Coconut',
+                    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600',
+                    ingredients: ['1 cup Chana Dal (Bengal Gram)', '¼ cup Fresh Coconut (fried bits)', '1 tsp Cumin seeds', '2 Bay Leaves', '1 Cinnamon stick', '1 tbsp Ghee', '1 tsp Sugar'],
+                    instructions: [
+                        'Step 1: Pressure cook Chana Dal with turmeric and salt until cooked but holding shape.',
+                        'Step 2: Shallow fry small coconut pieces in ghee until golden brown; set aside.',
+                        'Step 3: Temper cumin seeds, bay leaves, cinnamon, and cloves in ghee.',
+                        'Step 4: Pour in cooked dal, add fried coconut bits, ginger paste, and sugar for characteristic Bengali sweetness.',
+                        'Step 5: Simmer for 8 minutes and serve hot with fluffy Luchi (Puri)!'
+                    ]
+                },
+                {
+                    id: 'dl4',
+                    title: 'Andhra Tomato Pappu (Tangy Lentils)',
+                    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600',
+                    ingredients: ['1 cup Toor Dal', '3 Tomatoes (chopped)', '3 Green Chillies', '1 tsp Mustard Seeds', '1 tsp Cumin', '2 sprigs Curry Leaves', '2 tbsp Ghee'],
+                    instructions: [
+                        'Step 1: Pressure cook Toor Dal together with tomatoes, green chillies, and turmeric for 4 whistles.',
+                        'Step 2: Mash cooked dal and tomatoes smoothly with a wooden masher.',
+                        'Step 3: Heat ghee in a vessel, add mustard seeds, cumin seeds, garlic, and fresh curry leaves.',
+                        'Step 4: Pour the popping temper into the mashed dal and bring to a simmer.',
+                        'Step 5: Serve hot with steamed rice and a spoonful of ghee!'
+                    ]
+                }
+            ];
+        }
+
+        // UNIVERSAL DYNAMIC VARIETY ENGINE FOR ANY INDIAN DISH QUERY (`[Dish]`)
         return [
             {
-                id: `var_1_${Date.now()}`,
-                title: `Classic Home-Style ${titleCase}`,
+                id: `ind_var_1_${Date.now()}`,
+                title: `Punjabi Dhaba-Style ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Fresh key ingredients for ${titleCase}`, '1 Chopped Onion', '2 Tomatoes', '1 tsp Ginger-Garlic Paste', '1 tsp Cumin & Mustard seeds', 'Fresh Coriander', 'Cooking Oil / Ghee'],
+                ingredients: [`500g Primary ingredient for ${titleCase}`, '2 Onions (chopped)', '2 Tomatoes (pureed)', '1 tbsp Ginger-Garlic Paste', '1 tbsp Desi Ghee', '1 tsp Punjabi Garam Masala', '1 tsp Kasuri Methi'],
                 instructions: [
-                    `Step 1: Wash and prepare all fresh ingredients required for ${titleCase}.`,
-                    'Step 2: Heat 2 tbsp oil or ghee in a pan and add cumin seeds until they crackle.',
-                    'Step 3: Sauté onions and ginger-garlic paste until golden brown.',
-                    `Step 4: Add main components of ${titleCase} with salt, turmeric, and Indian spices.`,
-                    `Step 5: Simmer for 10-15 minutes until tender and fragrant. Garnish with coriander and serve hot!`
+                    `Step 1: Heat 1 tbsp desi ghee in a heavy kadhai and sauté onions until golden brown.`,
+                    'Step 2: Add ginger-garlic paste, tomato puree, red chilli powder, turmeric, and coriander powder.',
+                    'Step 3: Cook masala on medium flame for 7 minutes until oil separates from sides.',
+                    `Step 4: Add ${titleCase} components into the rich masala gravy with 1 cup warm water.`,
+                    'Step 5: Simmer for 12 minutes, finish with crushed Kasuri Methi, and serve hot with tandoori roti!'
                 ]
             },
             {
-                id: `var_2_${Date.now()}`,
-                title: `Spicy Dhaba-Style ${titleCase}`,
+                id: `ind_var_2_${Date.now()}`,
+                title: `South Indian Chettinad Spiced ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Primary ingredients for ${titleCase}`, '2 Green Chillies', '1 tsp Red Chilli Powder', '1 tsp Garam Masala', '1 tbsp Mustard Oil', 'Kasuri Methi'],
+                ingredients: [`Main ingredient for ${titleCase}`, '2 tbsp Chettinad Masala (Fennel, Black Pepper, Star Anise)', '10 Small Shallots', '2 sprigs Curry Leaves', '2 tbsp Gingelly / Coconut Oil'],
                 instructions: [
-                    `Step 1: Heat mustard oil in a heavy-bottom kadhai until smoky.`,
-                    'Step 2: Fry green chillies, onions, and spicy tomato paste on high flame.',
-                    `Step 3: Toss in ${titleCase} with bold dhaba spices and roast until well coated.`,
-                    'Step 4: Add half a cup of hot water and simmer for a rich spicy gravy.',
-                    'Step 5: Finish with crushed Kasuri Methi and fresh ginger juliennes!'
+                    'Step 1: Dry roast fennel seeds, peppercorns, coriander seeds, and dry red chillies; grind into fresh Chettinad spice powder.',
+                    'Step 2: Heat coconut oil in a pan, temper mustard seeds, curry leaves, and small shallots.',
+                    `Step 3: Toss in ${titleCase} with fresh Chettinad masala powder and turmeric.`,
+                    'Step 4: Roast on low flame until rich black-brown spices coat every piece.',
+                    'Step 5: Garnish with fresh curry leaves and serve hot with steamed rice or dosa!'
                 ]
             },
             {
-                id: `var_3_${Date.now()}`,
-                title: `Creamy Butter Masala ${titleCase}`,
+                id: `ind_var_3_${Date.now()}`,
+                title: `Hyderabadi Royal Dum ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Main ingredients for ${titleCase}`, '2 tbsp Butter', '2 tbsp Fresh Cream', '10 Cashews (ground)', 'Tomato Puree', 'Kashmiri Red Chilli'],
+                ingredients: [`Selected ${titleCase}`, '1 cup Fried Golden Onions (Birista)', '1 cup Whisked Curd', '1 tbsp Mint Leaves', '1 tsp Shahi Jeera', 'Saffron Milk & Ghee'],
                 instructions: [
-                    'Step 1: Sauté tomato puree with cashew paste and butter until silky and smooth.',
-                    `Step 2: Season gravy with Kashmiri chilli powder for vibrant natural color.`,
-                    `Step 3: Add ${titleCase} pieces into the rich gravy and gently fold.`,
-                    'Step 4: Swirl in fresh heavy cream and simmer on low heat for 4 minutes.',
-                    'Step 5: Serve rich and creamy with warm naan or jeera rice!'
+                    `Step 1: Marinate ${titleCase} with curd, ginger-garlic paste, mint, fried onions, and Shahi biryani masala for 30 minutes.`,
+                    'Step 2: Place marinated mixture in a heavy copper handi.',
+                    'Step 3: Drizzle pure ghee and saffron infused milk over the top.',
+                    'Step 4: Seal handi with dough and cook on slow dum heat for 20 minutes.',
+                    'Step 5: Unseal and serve hot for a royal Hyderabadi feast!'
                 ]
             },
             {
-                id: `var_4_${Date.now()}`,
-                title: `Crispy Tawa Fry ${titleCase}`,
+                id: `ind_var_4_${Date.now()}`,
+                title: `Mughlai Shahi Creamy ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Fresh ${titleCase}`, '1 tbsp Cornflour / Rice Flour', '1 tsp Chaat Masala', '1 Lemon', 'Curry leaves', 'Oil for tawa frying'],
+                ingredients: [`Fresh ${titleCase}`, '10 Cashews (ground to paste)', '2 tbsp Heavy Cream', '1 tbsp Ghee', 'Whole Cardamom & Cloves', 'Saffron strands'],
                 instructions: [
-                    `Step 1: Coat ${titleCase} with rice flour, cornflour, chilli powder, and salt.`,
-                    'Step 2: Heat 2 tbsp oil on a flat tawa.',
-                    `Step 3: Place coated ${titleCase} on the tawa and shallow fry until golden and extra crispy.`,
-                    'Step 4: Flip halfway and sprinkle chaat masala and fresh curry leaves.',
-                    'Step 5: Squeeze fresh lemon juice over the top and serve hot as a crispy starter!'
+                    'Step 1: Melt ghee in a pan and temper green cardamom, cloves, and bay leaf.',
+                    'Step 2: Add smooth cashew paste, boiled onion paste, and white pepper powder.',
+                    `Step 3: Fold in ${titleCase} and cook gently on low flame.`,
+                    'Step 4: Swirl in heavy fresh cream and saffron milk.',
+                    'Step 5: Garnish with slivered almonds and serve warm with garlic butter naan!'
                 ]
             },
             {
-                id: `var_5_${Date.now()}`,
-                title: `Royal Shahi / Mughlai ${titleCase}`,
+                id: `ind_var_5_${Date.now()}`,
+                title: `Crispy Street-Style Tawa Fry ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Selected ${titleCase}`, 'Saffron strands', '1 tbsp Ghee', 'Whole Cardamom & Cloves', 'Almond-Cashew paste', 'Kewra water'],
+                ingredients: [`Portioned ${titleCase}`, '1 tbsp Rice Flour', '1 tbsp Cornflour', '1 tsp Chaat Masala', '1 Lemon', 'Oil for frying'],
                 instructions: [
-                    'Step 1: Heat pure ghee in a pan and temper whole cloves, cardamom, and bay leaf.',
-                    'Step 2: Add almond-cashew white gravy base and simmer on low heat.',
-                    `Step 3: Incorporate ${titleCase} into the smooth fragrant sauce.`,
-                    'Step 4: Infuse with saffron milk and a drop of kewra water.',
-                    'Step 5: Garnish with sliced almonds and serve for a royal feast!'
+                    `Step 1: Coat ${titleCase} thoroughly with rice flour, cornflour, red chilli powder, salt, and lemon juice.`,
+                    'Step 2: Heat 2 tbsp oil on a flat iron tawa.',
+                    `Step 3: Shallow fry ${titleCase} on medium heat until outer crust turns golden and crispy.`,
+                    'Step 4: Flip halfway and sprinkle chaat masala.',
+                    'Step 5: Serve sizzling hot with green mint chutney and lemon wedges!'
                 ]
             },
             {
-                id: `var_6_${Date.now()}`,
-                title: `Healthy Steamed / Roasted ${titleCase}`,
+                id: `ind_var_6_${Date.now()}`,
+                title: `Rajasthani Spiced Kadai ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Fresh ${titleCase}`, '1 tsp Olive Oil', 'Crushed Black Pepper', 'Himalayan Pink Salt', 'Lemon Juice', 'Fresh Herbs'],
+                ingredients: [`Prepared ${titleCase}`, '2 Mathania Dry Red Chillies', '1 tsp Coriander Seeds', '1 tbsp Ghee', '1 tsp Amchur (Dry Mango Powder)', 'Coriander'],
                 instructions: [
-                    `Step 1: Toss ${titleCase} with olive oil, black pepper, and Himalayan salt.`,
-                    'Step 2: Arrange on a baking tray or steamer basket.',
-                    `Step 3: Roast at 200°C for 15 minutes or steam for 10 minutes until tender.`,
-                    'Step 4: Drizzle with extra virgin olive oil and lemon juice.',
-                    'Step 5: Enjoy a light, nutritious, guilt-free meal!'
+                    'Step 1: Heat ghee in a kadai and add whole dry Mathania red chillies and crushed coriander seeds.',
+                    `Step 2: Add ${titleCase} and sauté on high heat until aromatic.`,
+                    'Step 3: Add tomato gravy, amchur powder, and salt.',
+                    'Step 4: Cook until gravy thickens and coats the dish.',
+                    'Step 5: Serve hot with bajra roti or missi roti!'
                 ]
             }
         ];
@@ -246,27 +449,26 @@ export default function GlobalDishFinderScreen() {
     const fetchRecipesData = async () => {
         if (!searchQuery.trim()) return;
         setIsLoading(true);
-        const fallbackVarieties = generateDishVarieties(searchQuery);
+        const indianVarieties = generateIndianDishVarieties(searchQuery);
 
         try {
             const baseUrl = getApiBaseUrl();
             const response = await fetch(`${baseUrl}/api/recipes/search-recipes?dish=${encodeURIComponent(searchQuery)}`);
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
-                // If API returned some items, combine API items with full varieties set so user sees ALL varieties!
                 const combined = [...data];
-                fallbackVarieties.forEach(v => {
+                indianVarieties.forEach(v => {
                     if (!combined.some(c => c.title.toLowerCase() === v.title.toLowerCase())) {
                         combined.push(v);
                     }
                 });
                 setRecipesList(combined);
             } else {
-                setRecipesList(fallbackVarieties);
+                setRecipesList(indianVarieties);
             }
         } catch (err) {
             console.error("Connection error fallback ->", err);
-            setRecipesList(fallbackVarieties);
+            setRecipesList(indianVarieties);
         } finally {
             setIsLoading(false);
         }
@@ -275,12 +477,12 @@ export default function GlobalDishFinderScreen() {
     return (
         <SafeAreaView style={styles.safeContainer}>
             <View style={styles.mainContainer}>
-                <Text style={styles.appHeader}>🍲 Discover Global Recipes</Text>
-                <Text style={styles.subHeader}>Search any dish to view all its mouth-watering varieties, ingredients, and step-by-step guides.</Text>
+                <Text style={styles.appHeader}>🍲 Discover Global & Indian Recipes</Text>
+                <Text style={styles.subHeader}>Search any dish to view all authentic Indian regional varieties, required ingredients, and clear step-by-step guides.</Text>
 
                 <View style={styles.searchSection}>
                     <TextInput
-                        placeholder="Search dish (e.g., Paneer, Dosa, Biryani, Chicken, Pasta...)"
+                        placeholder="Search dish (e.g., Biryani, Chicken, Paneer, Dosa, Dal, Fish...)"
                         placeholderTextColor="#7f8c8d"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
@@ -329,7 +531,7 @@ export default function GlobalDishFinderScreen() {
                                     ))}
                                 </View>
 
-                                <Text style={styles.popupSectionHeadingTitle}>🍳 Step-by-Step Instructions</Text>
+                                <Text style={styles.popupSectionHeadingTitle}>🍳 Step-by-Step Cooking Instructions</Text>
                                 <View style={styles.dataCardBlockContainer}>
                                     {selectedDish.instructions.map((cookingStepText, indexId) => (
                                         <View key={indexId} style={styles.cookingStepRowContainer}>
