@@ -69,6 +69,123 @@ export default function CommunityScreen({ onBack }: { onBack: () => void }) {
   // Feed filter: 'all' | 'mine'
   const [feedFilter, setFeedFilter] = useState<'all' | 'mine'>('all');
 
+  const INITIAL_COMMUNITY_POSTS: PostItem[] = [
+    {
+      _id: 'post_sree_1',
+      username: 'sree',
+      recipeTitle: "Sree's Special Hyderabadi Chicken Biryani",
+      caption: "My family's authentic Hyderabadi secret dum chicken biryani! Slow-cooked to perfection with fragrant basmati rice, saffron, and homemade spices.",
+      imageOrVideoUrl: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80',
+      category: 'Main Course',
+      prepTime: '50 mins',
+      ingredients: [
+        '1kg Aged Long-grain Basmati Rice',
+        '1kg Fresh Chicken chunks',
+        '2 cups Thick Curd (Yogurt)',
+        'Fried Onions (Birista)',
+        'Saffron milk & Cardamom powder',
+        'Whole spices (Star anise, shahi jeera, cloves)'
+      ],
+      instructions: [
+        'Marinate chicken with yogurt, ginger-garlic paste, chili powder, and birista for at least 2 hours.',
+        'Parboil basmati rice with whole spices until 70% cooked.',
+        'Layer marinated chicken at the bottom of the pot, top with parboiled rice, saffron milk, ghee, and fried onions.',
+        'Seal the pot rim with dough/foil and cook on dum for 40 mins (10 mins medium heat, 30 mins low heat).'
+      ],
+      chefTip: 'Secret Tip: Never stir biryani with a sharp spoon; scoop gently from the sides using a flat plate so the long rice grains do not break!',
+      likes: 248,
+      likedBy: ['sree'],
+      comments: [
+        { username: 'Navya', text: 'This looks absolutely mouthwatering, Sree! Can you share the exact brand of basmati rice you used?' },
+        { username: 'arjun_cooks', text: 'That saffron aroma recommendation is spot on!' }
+      ]
+    },
+    {
+      _id: 'post_navya_1',
+      username: 'Navya',
+      recipeTitle: 'Authentic Creamy Garlic Fettuccine Alfredo',
+      caption: 'Zero shortcuts! Fresh pasta tossed in a creamy garlic butter sauce with plenty of grated Parmigiano-Reggiano and black pepper.',
+      imageOrVideoUrl: 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=800&auto=format&fit=crop&q=80',
+      category: 'Italian',
+      prepTime: '20 mins',
+      ingredients: [
+        '400g Fresh Fettuccine pasta',
+        '150g Aged Parmigiano-Reggiano (finely grated)',
+        '100g Unsalted Butter',
+        '4 cloves Garlic (minced)',
+        'Fresh Cracked Black Pepper',
+        '1 cup Reserved Pasta Starch Water'
+      ],
+      instructions: [
+        'Boil fettuccine in salted water until 1 minute before al dente.',
+        'Melt butter in a pan on ultra-low heat with minced garlic until fragrant.',
+        'Transfer pasta directly to the pan with 1/2 cup hot pasta water.',
+        'Remove from heat, shower in grated Parmigiano, and vigorously toss until a silky sauce forms.'
+      ],
+      chefTip: 'Secret Tip: Always remove the pan from direct heat before adding cheese, otherwise the protein in cheese separates into clumps!',
+      likes: 182,
+      likedBy: [],
+      comments: [
+        { username: 'sree', text: 'This is my go-to comfort food! Love the garlic addition.' }
+      ]
+    },
+    {
+      _id: 'post_sree_2',
+      username: 'sree',
+      recipeTitle: 'Pillowy Soft Paneer Butter Masala',
+      caption: 'Restaurant style rich tomato gravy with soft paneer cubes. The trick is soaking paneer in warm water first so it stays melt-in-the-mouth soft!',
+      imageOrVideoUrl: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?w=800&auto=format&fit=crop&q=80',
+      category: 'North Indian',
+      prepTime: '25 mins',
+      ingredients: [
+        '300g Fresh Paneer Cubes',
+        '4 Ripe Tomatoes (pureed)',
+        '2 Onions (finely chopped)',
+        '2 tbsp Kasuri Methi (crushed)',
+        '3 tbsp Butter & 1 tbsp Oil',
+        'Fresh Cream & Garam Masala'
+      ],
+      instructions: [
+        'Soak paneer cubes in warm salted water for 10 minutes.',
+        'Sauté onions and ginger-garlic paste in butter until golden brown.',
+        'Add tomato puree, chili powder, and cashew paste; cook until oil separates.',
+        'Add paneer cubes, fresh cream, Kasuri Methi, and simmer for 5 minutes.'
+      ],
+      chefTip: 'Secret Tip: Crushing Kasuri Methi between warm palms releases essential oils for that authentic restaurant flavor!',
+      likes: 310,
+      likedBy: ['sree'],
+      comments: [
+        { username: 'chef_raj', text: 'Great tip about soaking paneer! Tried it today and it worked amazingly.' }
+      ]
+    },
+    {
+      _id: 'post_arjun_1',
+      username: 'arjun_cooks',
+      recipeTitle: 'Golden Crispy Mysuru Masala Dosa',
+      caption: 'South Indian street style crispy dosa with red garlic chutney spread inside and spicy potato filling!',
+      imageOrVideoUrl: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=800&auto=format&fit=crop&q=80',
+      category: 'South Indian',
+      prepTime: '15 mins',
+      ingredients: [
+        'Fermented Dosa Batter',
+        'Spicy Red Garlic Chutney',
+        'Potato Palya filling',
+        'Desi Butter'
+      ],
+      instructions: [
+        'Spread thin layer of batter on hot cast iron tawa.',
+        'Smear red garlic chutney and generous butter.',
+        'Place potato filling in center and roast until golden crisp.'
+      ],
+      chefTip: 'Secret Tip: Sprinkle a pinch of sugar into fermented batter for rich golden color!',
+      likes: 195,
+      likedBy: [],
+      comments: [
+        { username: 'sree', text: 'Looks so crispy! Sambar recipe too please!' }
+      ]
+    }
+  ];
+
   // Fetch Community Feed from Backend
   useEffect(() => {
     fetchFeed();
@@ -79,11 +196,14 @@ export default function CommunityScreen({ onBack }: { onBack: () => void }) {
     try {
       const res = await fetch(`${getApiBaseUrl()}/api/community/feed`);
       const json = await res.json();
-      if (json.posts) {
+      if (json.posts && json.posts.length > 0) {
         setPosts(json.posts);
+      } else {
+        setPosts(INITIAL_COMMUNITY_POSTS);
       }
     } catch (err) {
       console.error('Failed to load community feed:', err);
+      setPosts(INITIAL_COMMUNITY_POSTS);
     } finally {
       setIsLoading(false);
     }
