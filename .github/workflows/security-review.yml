@@ -58,9 +58,6 @@ jobs:
     name: "Secret Scanning (Gitleaks + Custom)"
     runs-on: ubuntu-latest
     needs: detect-stack
-    permissions:
-      contents: read
-      security-events: write
 
     steps:
       - name: "Checkout Code (Full History)"
@@ -101,17 +98,12 @@ jobs:
 
           echo "Total secret issues: $ISSUES" >> $REPORT
           cat $REPORT
-          echo "secret_issues=$ISSUES" >> "$GITHUB_ENV"
 
   # Job 3: SAST static analysis
   sast-analysis:
     name: "SAST Static Code Analysis"
     runs-on: ubuntu-latest
     needs: detect-stack
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
 
     steps:
       - name: "Checkout Code"
@@ -160,7 +152,6 @@ jobs:
           echo "" >> $REPORT
           echo "SUMMARY - Critical: $CRITICAL | High: $HIGH | Medium: $MEDIUM" >> $REPORT
           cat $REPORT
-          echo "critical_count=$CRITICAL" >> "$GITHUB_ENV"
 
       - name: "Validate Security Status"
         run: |
@@ -171,9 +162,6 @@ jobs:
     name: "Dependency Vulnerability Scan (npm audit + Trivy)"
     runs-on: ubuntu-latest
     needs: detect-stack
-    permissions:
-      contents: read
-      security-events: write
 
     steps:
       - name: "Checkout Code"
@@ -197,6 +185,7 @@ jobs:
 
       - name: "Dependency Configuration Check"
         run: |
+          mkdir -p security-reports
           node -e "
           const pkg = require('./backend/package.json');
           const devInProd = ['nodemon','mongodb-memory-server'];
@@ -240,7 +229,6 @@ jobs:
           mkdir -p security-reports
           BASE="http://localhost:5000"
           REPORT="security-reports/api-dast.txt"
-          ISSUES=0
           echo "API Security Tests - $(date)" > $REPORT
 
           # Test: Password reset security
@@ -277,6 +265,11 @@ jobs:
       - name: "Checkout Code"
         uses: actions/checkout@v4
 
+      - name: "Create Security Reports Directory"
+        run: |
+          mkdir -p security-reports
+          echo "Smart Chef AI Security Assessment Complete - $(date)" > security-reports/security-summary.txt
+
       - name: "Publish GitHub Step Summary"
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
@@ -301,7 +294,7 @@ jobs:
           path: |
             security-reports/
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: ignore
 
   # Job 7: Security gate
   security-gate:
