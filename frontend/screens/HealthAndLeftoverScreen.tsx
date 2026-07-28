@@ -93,18 +93,310 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
   const getFallbackRemedy = (query: string): RemedyResult => {
     const q = query.toLowerCase();
 
-    if (q.includes('weakness') || q.includes('fatigue') || q.includes('tired') || q.includes('energy')) {
+    // 1. FEVER
+    if (q.includes('fever') || q.includes('temperature') || q.includes('pyrexia')) {
       return {
-        condition: 'General Weakness & Fatigue',
+        condition: 'Fever & High Body Heat',
+        medicine: 'Coriander-Cumin Cooling Infusion (Jwara Shamaka)',
+        emoji: '🌡️',
+        color: '#EF4444',
+        ingredients: [
+          '1 tsp Coriander Seeds (Dhania)',
+          '½ tsp Cumin Seeds (Jeera)',
+          '½ tsp Dry Ginger Powder (Saunth)',
+          '2 cups Water',
+          '½ tsp Rock Sugar / Mishri'
+        ],
+        ingredientCards: [
+          { name: 'Coriander Seeds', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '1 tsp' },
+          { name: 'Cumin Seeds', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '½ tsp' },
+          { name: 'Ginger Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '½ tsp' },
+          { name: 'Rock Sugar', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '½ tsp' }
+        ],
+        steps: [
+          '🥣 Step 1: Lightly crush 1 tsp coriander seeds and ½ tsp cumin seeds in a small mortar.',
+          '🫖 Step 2: Add the crushed seeds and ½ tsp ginger powder to 2 cups of boiling water.',
+          '🔥 Step 3: Simmer on low-medium heat for 8 minutes until water reduces to 1 cup.',
+          '🍵 Step 4: Strain into a clean cup, add ½ tsp rock sugar (Mishri), and let cool to lukewarm.',
+          '⏱️ Step 5: Drink half a cup twice daily to help bring down fever and cool internal body heat.'
+        ]
+      };
+    }
+
+    // 2. COUGH
+    if (q.includes('cough') || q.includes('khansi') || q.includes('phlegm')) {
+      return {
+        condition: 'Cough & Throat Congestion',
+        medicine: 'Sitopaladi & Tulsi-Ginger Black Pepper Kadha',
+        emoji: '🤧',
+        color: '#F97316',
+        ingredients: [
+          '8 Fresh Tulsi / Holy Basil Leaves',
+          '1 inch Fresh Grated Ginger (Adrak)',
+          '4 Coarsely Crushed Black Peppercorns',
+          '½ tsp Turmeric Powder',
+          '1 tbsp Pure Organic Honey'
+        ],
+        ingredientCards: [
+          { name: 'Tulsi Leaves', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '8 leaves' },
+          { name: 'Fresh Ginger', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 inch' },
+          { name: 'Black Pepper', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '4 peppercorns' },
+          { name: 'Organic Honey', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tbsp' }
+        ],
+        steps: [
+          '💧 Step 1: Boil 2 cups of clean water in a small pan.',
+          '🍃 Step 2: Add 8 torn Tulsi leaves, grated fresh ginger, and crushed black peppercorns.',
+          '🟡 Step 3: Add ½ tsp turmeric powder and simmer on low heat for 10 minutes until water halves.',
+          '🍯 Step 4: Strain into a cup, let cool until warm (not boiling hot), and mix in 1 tbsp organic honey.',
+          '☕ Step 5: Sip slowly 3 times a day for fast cough and throat relief!'
+        ]
+      };
+    }
+
+    // 3. COLD
+    if (q.includes('cold') || q.includes('sardi') || q.includes('runny nose') || q.includes('sinus')) {
+      return {
+        condition: 'Common Cold & Sinus Relief',
+        medicine: 'Cinnamon-Clove Warm Kadha & Steam Inhalation',
+        emoji: '🤒',
+        color: '#3B82F6',
+        ingredients: [
+          '1 Cinnamon Stick (Dalchini)',
+          '3 Whole Cloves (Laung)',
+          '1 inch Crushed Ginger',
+          '1 tbsp Jaggery / Gur',
+          '2 cups Water'
+        ],
+        ingredientCards: [
+          { name: 'Cinnamon Stick', image: 'https://images.unsplash.com/photo-1509358271058-acd02cc93898?w=500', quantity: '1 stick' },
+          { name: 'Cloves', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '3 cloves' },
+          { name: 'Jaggery / Gur', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tbsp' }
+        ],
+        steps: [
+          '🪵 Step 1: Lightly crush 1 cinnamon stick, 3 cloves, and 1 inch ginger.',
+          '🫖 Step 2: Boil 2 cups water, add all crushed spices, and simmer for 7 minutes.',
+          '🟤 Step 3: Add 1 tbsp jaggery and stir until completely dissolved.',
+          '🍵 Step 4: Strain and drink hot twice daily to clear blocked nose and chest congestion.',
+          '💨 Step 5: Inhale steam from hot water with a pinch of turmeric before sleep for instant relief!'
+        ]
+      };
+    }
+
+    // 4. HEADACHE
+    if (q.includes('headache') || q.includes('head pain') || q.includes('migraine') || q.includes('sir dard')) {
+      return {
+        condition: 'Headache & Tension Relief',
+        medicine: 'Soothing Ginger Paste & Elaichi Cooling Drink',
+        emoji: '🧠',
+        color: '#8B5CF6',
+        ingredients: [
+          '1 tbsp Dry Ginger Powder (Saunth)',
+          '2 tbsp Warm Water (for paste)',
+          '2 Green Cardamoms (Elaichi)',
+          '1 tsp Pure Cow Ghee'
+        ],
+        ingredientCards: [
+          { name: 'Ginger Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tbsp' },
+          { name: 'Cardamom', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '2 pods' },
+          { name: 'Pure Ghee', image: 'https://images.unsplash.com/photo-1631700611307-37dbab89ef7e?w=500', quantity: '1 tsp' }
+        ],
+        steps: [
+          '🥣 Step 1: Mix 1 tbsp dry ginger powder with 2 tbsp warm water to form a smooth paste.',
+          '💆 Step 2: Apply the ginger paste gently over your forehead and temples.',
+          '⏳ Step 3: Lie down in a quiet, dark room for 15 minutes as ginger relaxes forehead blood vessels.',
+          '🍵 Step 4: Boil 1 cup water with 2 crushed cardamoms and ½ tsp ghee; sip warm.',
+          '🚿 Step 5: Gently wipe off dry paste with warm water for complete headache relief!'
+        ]
+      };
+    }
+
+    // 5. ACIDITY
+    if (q.includes('acidity') || q.includes('heartburn') || q.includes('gas') || q.includes('bloating') || q.includes('indigestion')) {
+      return {
+        condition: 'Acidity, Gas & Heartburn',
+        medicine: 'Cooling Fennel-Cumin Overnight Water (Pitta Shanti)',
+        emoji: '🫃',
+        color: '#06B6D4',
+        ingredients: [
+          '1 tsp Fennel Seeds (Saunf)',
+          '1 tsp Cumin Seeds (Jeera)',
+          '1 tsp Coriander Seeds (Dhania)',
+          '1 cup Water',
+          '1 tsp Rock Sugar / Mishri'
+        ],
+        ingredientCards: [
+          { name: 'Fennel Seeds', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '1 tsp' },
+          { name: 'Cumin Seeds', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '1 tsp' },
+          { name: 'Rock Sugar', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tsp' }
+        ],
+        steps: [
+          '🥣 Step 1: Soak 1 tsp fennel seeds, 1 tsp cumin seeds, and 1 tsp coriander seeds in 1 cup water overnight.',
+          '🥄 Step 2: In the morning, crush the seeds gently inside the water using a spoon.',
+          '🍵 Step 3: Strain the clear herbal water into a glass.',
+          '🧊 Step 4: Add 1 tsp rock sugar (Mishri) and stir until dissolved.',
+          '🥛 Step 5: Drink on empty stomach first thing in the morning to instantly cool acid reflux!'
+        ]
+      };
+    }
+
+    // 6. INSOMNIA
+    if (q.includes('insomnia') || q.includes('sleep') || q.includes('sleepless') || q.includes('night')) {
+      return {
+        condition: 'Insomnia & Sleep Support',
+        medicine: 'Warm Nutmeg-Ashwagandha Sleep Milk (Nidra Bhojana)',
+        emoji: '😴',
+        color: '#6366F1',
+        ingredients: [
+          '1 cup Fresh Cow Milk / Almond Milk',
+          '¼ tsp Nutmeg Powder (Jaiphal)',
+          '1 tsp Ashwagandha Powder',
+          '½ tsp Pure Cow Ghee',
+          '1 tsp Raw Honey'
+        ],
+        ingredientCards: [
+          { name: 'Warm Milk', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500', quantity: '1 cup' },
+          { name: 'Nutmeg Powder', image: 'https://images.unsplash.com/photo-1509358271058-acd02cc93898?w=500', quantity: '¼ tsp' },
+          { name: 'Ashwagandha', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' }
+        ],
+        steps: [
+          '🥛 Step 1: Pour 1 cup of milk into a small saucepan and warm on low flame.',
+          '🌿 Step 2: Stir in 1 tsp Ashwagandha powder, ¼ tsp freshly grated nutmeg, and ½ tsp ghee.',
+          '🔥 Step 3: Simmer gently on low heat for 4 minutes so herbs blend into the milk.',
+          '🍯 Step 4: Turn off heat, let cool to warm, and stir in 1 tsp raw honey.',
+          '🌙 Step 5: Sip slowly 20 minutes before bedtime for deep, natural, unbroken sleep!'
+        ]
+      };
+    }
+
+    // 7. JOINT PAIN
+    if (q.includes('joint') || q.includes('arthritis') || q.includes('knee') || q.includes('back pain')) {
+      return {
+        condition: 'Joint Pain & Arthritis Relief',
+        medicine: 'Garlic-Turmeric Golden Milk & Warm Sesame Oil Massage',
+        emoji: '🦴',
+        color: '#D97706',
+        ingredients: [
+          '3 Garlic Cloves (Crushed)',
+          '½ tsp Turmeric Powder',
+          '1 cup Fresh Milk',
+          '2 tbsp Pure Sesame Oil (Til Tel)',
+          '½ tsp Dry Ginger Powder'
+        ],
+        ingredientCards: [
+          { name: 'Garlic Cloves', image: 'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=500', quantity: '3 cloves' },
+          { name: 'Turmeric Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '½ tsp' },
+          { name: 'Sesame Oil', image: 'https://images.unsplash.com/photo-1631700611307-37dbab89ef7e?w=500', quantity: '2 tbsp' }
+        ],
+        steps: [
+          '🧄 Step 1: Crush 3 garlic cloves and boil in 1 cup milk with ½ tsp turmeric for 6 minutes.',
+          '🥛 Step 2: Drink this warm Garlic-Turmeric Milk every evening to reduce joint stiffness.',
+          '🫙 Step 3: Warm 2 tbsp sesame oil with ½ tsp dry ginger powder on low heat.',
+          '💆 Step 4: Gently massage the warm oil over aching knees/joints for 10 minutes.',
+          '♨️ Step 5: Apply a warm hot-water bag or warm towel for 5 minutes for deep pain relief!'
+        ]
+      };
+    }
+
+    // 8. STRESS
+    if (q.includes('stress') || q.includes('anxiety') || q.includes('tension') || q.includes('mind')) {
+      return {
+        condition: 'Stress, Anxiety & Mental Fatigue',
+        medicine: 'Brahmi-Shankhpushpi Calm Tonic & Deep Breathing',
+        emoji: '🧘',
+        color: '#10B981',
+        ingredients: [
+          '1 tsp Brahmi Powder',
+          '½ tsp Shankhpushpi Powder',
+          '2 Green Cardamom Pods',
+          '1 cup Water',
+          '½ tsp Honey'
+        ],
+        ingredientCards: [
+          { name: 'Brahmi Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' },
+          { name: 'Cardamom', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '2 pods' },
+          { name: 'Honey', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '½ tsp' }
+        ],
+        steps: [
+          '🫖 Step 1: Boil 1 cup water with 2 crushed cardamom pods.',
+          '🌿 Step 2: Stir in 1 tsp Brahmi powder and ½ tsp Shankhpushpi powder.',
+          '🔥 Step 3: Simmer for 5 minutes on low flame.',
+          '🍯 Step 4: Strain into a cup and mix with ½ tsp honey.',
+          '🧠 Step 5: Sip once daily in the evening while practicing 10 minutes of deep Pranayama breathing!'
+        ]
+      };
+    }
+
+    // 9. SKIN
+    if (q.includes('skin') || q.includes('acne') || q.includes('pimple') || q.includes('glow')) {
+      return {
+        condition: 'Skin Pimples, Acne & Facial Glow',
+        medicine: 'Neem-Turmeric Detox Tea & Sandalwood Pack',
+        emoji: '🌿',
+        color: '#059669',
+        ingredients: [
+          '6-8 Clean Neem Leaves',
+          '½ tsp Turmeric Powder',
+          '1 tsp Sandalwood Powder (Chandan)',
+          '1 tbsp Pure Rose Water',
+          '1 cup Water'
+        ],
+        ingredientCards: [
+          { name: 'Neem Leaves', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '6-8 leaves' },
+          { name: 'Turmeric Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '½ tsp' },
+          { name: 'Rose Water', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tbsp' }
+        ],
+        steps: [
+          '💧 Step 1: Boil 6-8 Neem leaves in 1 cup water for 7 minutes; strain and drink as a blood purifier.',
+          '🥣 Step 2: Mix 1 tsp sandalwood powder with ½ tsp turmeric and 1 tbsp rose water into a smooth paste.',
+          '✨ Step 3: Apply the cooling paste over your face and acne spots.',
+          '⏱️ Step 4: Leave on for 15 minutes until dry.',
+          '🚿 Step 5: Rinse off with cool water for clear, glowing, pimple-free skin!'
+        ]
+      };
+    }
+
+    // 10. HAIR FALL
+    if (q.includes('hair') || q.includes('dandruff') || q.includes('hairfall') || q.includes('scalp')) {
+      return {
+        condition: 'Hair Fall & Scalp Health',
+        medicine: 'Bhringraj-Amla Vitalizer & Curry Leaf Hair Oil',
+        emoji: '💆',
+        color: '#4F46E5',
+        ingredients: [
+          '1 tsp Amla Powder (Indian Gooseberry)',
+          '1 tsp Bhringraj Powder',
+          '10 Fresh Curry Leaves',
+          '3 tbsp Pure Coconut Oil',
+          '1 cup Warm Water'
+        ],
+        ingredientCards: [
+          { name: 'Amla Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' },
+          { name: 'Curry Leaves', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '10 leaves' },
+          { name: 'Coconut Oil', image: 'https://images.unsplash.com/photo-1631700611307-37dbab89ef7e?w=500', quantity: '3 tbsp' }
+        ],
+        steps: [
+          '🍵 Step 1: Mix 1 tsp Amla powder in 1 cup warm water and drink every morning on empty stomach.',
+          '🥥 Step 2: Heat 3 tbsp coconut oil with 10 curry leaves and 1 tsp Bhringraj powder for 5 minutes.',
+          '💆 Step 3: Let the oil cool to lukewarm, then massage gently into scalp using fingertips.',
+          '⏳ Step 4: Leave on for at least 45 minutes (or overnight).',
+          '🧼 Step 5: Wash hair with a mild herbal shampoo 2-3 times a week for strong roots!'
+        ]
+      };
+    }
+
+    // 11. WEAKNESS
+    if (q.includes('weakness') || q.includes('fatigue') || q.includes('tired') || q.includes('stamina')) {
+      return {
+        condition: 'General Weakness & Low Stamina',
         medicine: 'Ashwagandha & Date Energy Tonic (Balya Rasayana)',
         emoji: '⚡',
         color: '#EAB308',
         ingredients: [
-          '1 tsp Ashwagandha Powder (Withania somnifera)',
+          '1 tsp Ashwagandha Powder',
           '2 Seeded Medjool Dates / Khajur',
-          '1 cup Warm Pure Cow Milk / Almond Milk',
+          '1 cup Warm Pure Cow Milk',
           '½ tsp Cow Ghee',
-          'Pinch of Cardamom Powder (Elaichi)'
+          'Pinch of Cardamom Powder'
         ],
         ingredientCards: [
           { name: 'Ashwagandha', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' },
@@ -116,40 +408,41 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
           '🥛 Step 1: Warm 1 cup of fresh milk in a small pan on low flame.',
           '🌴 Step 2: Deseed 2 dates, chop finely, and add to the milk.',
           '🌿 Step 3: Stir in 1 tsp Ashwagandha powder, ½ tsp ghee, and a pinch of crushed cardamom.',
-          '🔥 Step 4: Simmer gently on low heat for 5 minutes so dates soften and blend into the milk.',
-          '🌙 Step 5: Drink this warm restorative tonic every night 30 minutes before sleep to rebuild vitality!'
+          '🔥 Step 4: Simmer gently on low heat for 5 minutes so dates soften into the milk.',
+          '🌙 Step 5: Drink warm every night 30 minutes before sleep to rebuild muscle and stamina!'
         ]
       };
     }
 
-    if (q.includes('cough') || q.includes('cold') || q.includes('throat') || q.includes('fever')) {
+    // 12. DIABETES
+    if (q.includes('diabetes') || q.includes('sugar') || q.includes('glucose') || q.includes('diabetic')) {
       return {
-        condition: 'Cough, Cold & Immunity Relief',
-        medicine: 'Sitopaladi & Tulsi-Ginger Immune Kadha',
-        emoji: '🤧',
-        color: '#F97316',
+        condition: 'Diabetes & High Blood Sugar',
+        medicine: 'Jamun-Karela Glucose Balancer & Methi Water',
+        emoji: '🩸',
+        color: '#DC2626',
         ingredients: [
-          '6-8 Fresh Tulsi / Holy Basil Leaves',
-          '1 inch Fresh Crushed Ginger (Adrak)',
-          '½ tsp Turmeric Powder (Haldi)',
-          '4 Black Peppercorns (Kali Mirch)',
-          '1 tbsp Organic Raw Honey'
+          '1 tsp Fenugreek Seeds (Methi Dana)',
+          '½ tsp Jamun Seed Powder',
+          '½ tsp Cinnamon Powder (Dalchini)',
+          '1 cup Water'
         ],
         ingredientCards: [
-          { name: 'Tulsi Leaves', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '6-8 leaves' },
-          { name: 'Fresh Ginger', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 inch' },
-          { name: 'Organic Honey', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tbsp' }
+          { name: 'Methi Seeds', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=500', quantity: '1 tsp' },
+          { name: 'Jamun Powder', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '½ tsp' },
+          { name: 'Cinnamon Powder', image: 'https://images.unsplash.com/photo-1509358271058-acd02cc93898?w=500', quantity: '½ tsp' }
         ],
         steps: [
-          '💧 Step 1: Boil 2 cups of water in a vessel.',
-          '🍃 Step 2: Add crushed ginger, Tulsi leaves, and coarsely crushed black peppercorns.',
-          '🟡 Step 3: Add ½ tsp turmeric powder and boil until water reduces to 1 cup.',
-          '🍯 Step 4: Strain into a cup, allow to cool to warm, and mix in 1 tbsp organic raw honey.',
-          '☕ Step 5: Sip slowly 2-3 times daily for fast respiratory comfort!'
+          '🥣 Step 1: Soak 1 tsp Methi seeds in 1 cup water overnight.',
+          '🌅 Step 2: In the morning, chew the soaked seeds and drink the infused water on an empty stomach.',
+          '🫖 Step 3: Mix ½ tsp Jamun seed powder + ½ tsp cinnamon in 1 cup warm water before lunch.',
+          '🏃 Step 4: Take a 20-minute brisk walk after lunch and dinner to help insulin absorption.',
+          '🩸 Step 5: Repeat daily to help regulate fasting blood glucose levels naturally!'
         ]
       };
     }
 
+    // Default universal Ayurvedic remedy
     return {
       condition: query.charAt(0).toUpperCase() + query.slice(1),
       medicine: 'Triphala & Golden Herbal Immunity Brew',
@@ -158,7 +451,7 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
       ingredients: [
         '1 tsp Triphala Powder',
         '½ tsp Dry Ginger (Saunth)',
-        '½ tsp Turmeric',
+        '½ tsp Turmeric Powder',
         '1 tsp Raw Honey',
         '1 cup Warm Water'
       ],
@@ -168,7 +461,7 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
       ],
       steps: [
         '💧 Step 1: Mix 1 tsp Triphala powder and ½ tsp turmeric in 1 cup of warm water.',
-        '🍯 Step 2: Add 1 tsp raw honey and stir well until dissolved.',
+        '🍯 Step 2: Add 1 tsp raw honey and stir well until completely dissolved.',
         '🍵 Step 3: Sip warm on an empty stomach in the morning or before bedtime for natural balance!'
       ]
     };
