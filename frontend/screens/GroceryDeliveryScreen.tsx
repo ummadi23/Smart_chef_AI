@@ -20,11 +20,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
     { name: 'Fresh Eggs', emoji: '🥚' },
     { name: 'Cow Ghee', emoji: '🧈' },
     { name: 'Red Onions', emoji: '🧅' },
-    { name: 'Fresh Garlic Cloves', emoji: '🧄' },
+    { name: 'Garlic Cloves', emoji: '🧄' },
     { name: 'Basmati Rice', emoji: '🍚' },
     { name: 'Ragi Flour', emoji: '🌾' },
     { name: 'Amul Butter', emoji: '🧈' },
-    { name: 'Fresh Mint & Coriander', emoji: '🌿' },
+    { name: 'Mint & Coriander', emoji: '🌿' },
   ];
 
   const stores = [
@@ -33,10 +33,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
       name: 'Blinkit',
       speed: '⚡ 10 MINS',
       tagline: 'Instant Grocery & Fresh Produce',
-      accentColor: '#FACC15',
-      badgeBg: 'rgba(250, 204, 21, 0.15)',
-      cardBg: '#131924',
-      borderColor: 'rgba(250, 204, 21, 0.4)',
+      brandColor: '#EAB308',
+      buttonBg: '#EAB308',
+      buttonText: '#1E1B4B',
+      badgeBg: '#FEF9C3',
+      badgeText: '#854D0E',
       icon: '🟡',
       description: 'Opens Blinkit directly with your selected ingredient pre-searched.',
       getUrl: (query: string) => `https://blinkit.com/s/?q=${encodeURIComponent(query || 'Groceries')}`
@@ -46,10 +47,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
       name: 'Zepto',
       speed: '🚀 10 MINS',
       tagline: 'Superfast Grocery Delivery',
-      accentColor: '#C084FC',
-      badgeBg: 'rgba(192, 132, 252, 0.15)',
-      cardBg: '#18122B',
-      borderColor: 'rgba(192, 132, 252, 0.4)',
+      brandColor: '#9333EA',
+      buttonBg: '#9333EA',
+      buttonText: '#FFFFFF',
+      badgeBg: '#F3E8FF',
+      badgeText: '#6B21A8',
       icon: '🟣',
       description: 'Opens Zepto app or website directly with item pre-filled.',
       getUrl: (query: string) => `https://www.zeptonow.com/search?query=${encodeURIComponent(query || 'Groceries')}`
@@ -59,10 +61,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
       name: 'BigBasket',
       speed: '🥬 FRESH & PANTRY',
       tagline: 'Farm-Fresh Veggies & Daily Staples',
-      accentColor: '#34D399',
-      badgeBg: 'rgba(52, 211, 153, 0.15)',
-      cardBg: '#0F231C',
-      borderColor: 'rgba(52, 211, 153, 0.4)',
+      brandColor: '#059669',
+      buttonBg: '#059669',
+      buttonText: '#FFFFFF',
+      badgeBg: '#D1FAE5',
+      badgeText: '#065F46',
       icon: '🟢',
       description: 'Opens BigBasket website with fresh items pre-searched.',
       getUrl: (query: string) => `https://www.bigbasket.com/ps/?q=${encodeURIComponent(query || 'Groceries')}`
@@ -72,10 +75,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
       name: 'Swiggy Instamart',
       speed: '⚡ 10-15 MINS',
       tagline: 'Instant Doorstep Delivery',
-      accentColor: '#FB923C',
-      badgeBg: 'rgba(251, 146, 60, 0.15)',
-      cardBg: '#231510',
-      borderColor: 'rgba(251, 146, 60, 0.4)',
+      brandColor: '#EA580C',
+      buttonBg: '#EA580C',
+      buttonText: '#FFFFFF',
+      badgeBg: '#FFEDD5',
+      badgeText: '#9A3412',
       icon: '🟠',
       description: 'Opens Swiggy Instamart directly for 10-minute grocery delivery.',
       getUrl: (query: string) => `https://www.swiggy.com/instamart/search?custom_back=true&query=${encodeURIComponent(query || 'Groceries')}`
@@ -85,10 +89,11 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
       name: 'Amazon Fresh',
       speed: '🟧 SAME DAY',
       tagline: 'Pantry, Milk & Daily Grocery Essentials',
-      accentColor: '#FBBF24',
-      badgeBg: 'rgba(251, 191, 36, 0.15)',
-      cardBg: '#1C1917',
-      borderColor: 'rgba(251, 191, 36, 0.4)',
+      brandColor: '#D97706',
+      buttonBg: '#D97706',
+      buttonText: '#FFFFFF',
+      badgeBg: '#FEF3C7',
+      badgeText: '#92400E',
       icon: '🟧',
       description: 'Opens Amazon Fresh directly with your item pre-searched.',
       getUrl: (query: string) => `https://www.amazon.in/s?k=${encodeURIComponent(query || 'Groceries')}+grocery`
@@ -107,7 +112,7 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0B0F17" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
 
       {/* Header */}
       <View style={styles.header}>
@@ -115,95 +120,100 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
           <Text style={styles.backBtnTxt}>← Home</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerBadge}>🛒 10-MIN INSTANT GROCERY HUB</Text>
-          <Text style={styles.headerTitle}>Direct Grocery Launcher</Text>
+          <Text style={styles.headerBadge}>🛒 10-MIN INSTANT EXPRESS</Text>
+          <Text style={styles.headerTitle}>Grocery Store Launcher</Text>
         </View>
         <View style={{ width: 60 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Banner */}
-        <View style={styles.banner}>
-          <View style={styles.bannerIconBadge}>
+        {/* Elegant Hero Banner */}
+        <View style={styles.heroBanner}>
+          <View style={styles.heroBadgeIcon}>
             <Text style={{ fontSize: 24 }}>⚡</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.bannerTitle}>Order Ingredients in 10 Minutes</Text>
-            <Text style={styles.bannerSub}>
-              Select any missing ingredient or type what you need. Tap a delivery store below to jump straight to their app with your search pre-filled!
+            <Text style={styles.heroTitle}>Direct Store Express Launcher</Text>
+            <Text style={styles.heroSub}>
+              Type or select missing ingredients below. Tap any official store to launch their app instantly with your search pre-loaded.
             </Text>
           </View>
         </View>
 
-        {/* Search Bar */}
-        <View style={styles.searchWrap}>
-          <Text style={styles.searchIcon}>🔍</Text>
+        {/* Elegant Search Input */}
+        <View style={styles.searchBox}>
+          <Text style={styles.searchLens}>🔍</Text>
           <TextInput
-            style={styles.searchInput}
-            placeholder="Type ingredient to buy (e.g., Paneer, Chicken, Tomatoes)..."
-            placeholderTextColor="#64748B"
+            style={styles.searchInputField}
+            placeholder="Type ingredient to buy (e.g. Paneer, Chicken, Tomatoes)..."
+            placeholderTextColor="#94A3B8"
             value={searchItem}
             onChangeText={setSearchItem}
           />
           {searchItem.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchItem('')} style={styles.clearBtn}>
-              <Text style={styles.clearBtnTxt}>✕</Text>
+            <TouchableOpacity onPress={() => setSearchItem('')} style={styles.clearSearchBtn}>
+              <Text style={styles.clearSearchTxt}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* Quick Select Ingredient Cards */}
-        <Text style={styles.sectionHeading}>Tap Ingredient to Select</Text>
-        <View style={styles.chipsGrid}>
+        {/* Quick Ingredient Picker Chips */}
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Tap Ingredient to Pre-fill</Text>
+          {searchItem ? (
+            <TouchableOpacity onPress={() => setSearchItem('')}>
+              <Text style={styles.resetLinkTxt}>Clear Selection</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
+
+        <View style={styles.chipsContainer}>
           {popularIngredients.map((item) => {
             const isSelected = searchItem.toLowerCase() === item.name.toLowerCase();
             return (
               <TouchableOpacity
                 key={item.name}
-                style={[styles.chipCard, isSelected && styles.chipCardActive]}
+                style={[styles.chipItem, isSelected && styles.chipItemActive]}
                 onPress={() => setSearchItem(isSelected ? '' : item.name)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.chipEmoji}>{item.emoji}</Text>
-                <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>{item.name}</Text>
+                <Text style={styles.chipEmojiTxt}>{item.emoji}</Text>
+                <Text style={[styles.chipLabelTxt, isSelected && styles.chipLabelActive]}>{item.name}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
 
-        {/* Official Delivery Apps / Websites List */}
-        <Text style={styles.sectionHeading}>
-          Launch Store App {searchItem ? `for "${searchItem}"` : ''}
+        {/* Store Cards Grid / List */}
+        <Text style={styles.sectionTitle}>
+          Select Grocery App to Launch {searchItem ? `for "${searchItem}"` : ''}
         </Text>
 
-        <View style={styles.storeList}>
+        <View style={styles.storeCardsList}>
           {stores.map((store) => (
-            <View
-              key={store.id}
-              style={[styles.storeCard, { backgroundColor: store.cardBg, borderColor: store.borderColor }]}
-            >
-              <View style={styles.storeTopRow}>
-                <View style={styles.storeBrandRow}>
-                  <Text style={styles.storeIcon}>{store.icon}</Text>
+            <View key={store.id} style={styles.storeCardWrapper}>
+              <View style={styles.storeCardTop}>
+                <View style={styles.storeLogoTitleGroup}>
+                  <Text style={styles.storeIconEmoji}>{store.icon}</Text>
                   <View>
-                    <Text style={[styles.storeName, { color: store.accentColor }]}>{store.name}</Text>
-                    <Text style={styles.storeTagline}>{store.tagline}</Text>
+                    <Text style={[styles.storeBrandTitle, { color: '#1E293B' }]}>{store.name}</Text>
+                    <Text style={styles.storeTaglineTxt}>{store.tagline}</Text>
                   </View>
                 </View>
-                <View style={[styles.speedBadge, { backgroundColor: store.badgeBg, borderColor: store.accentColor + '44' }]}>
-                  <Text style={[styles.speedBadgeTxt, { color: store.accentColor }]}>{store.speed}</Text>
+                <View style={[styles.speedTagBadge, { backgroundColor: store.badgeBg }]}>
+                  <Text style={[styles.speedTagTxt, { color: store.badgeText }]}>{store.speed}</Text>
                 </View>
               </View>
 
-              <Text style={styles.storeDesc}>{store.description}</Text>
+              <Text style={styles.storeCardDescTxt}>{store.description}</Text>
 
               <TouchableOpacity
-                style={[styles.openWebsiteBtn, { backgroundColor: store.accentColor }]}
+                style={[styles.launchAppButton, { backgroundColor: store.buttonBg }]}
                 onPress={() => handleOpenStoreWebsite(store)}
-                activeOpacity={0.85}
+                activeOpacity={0.88}
               >
-                <Text style={styles.openWebsiteBtnTxt}>
-                  {searchItem ? `Open ${store.name} for "${searchItem}" ↗` : `Open ${store.name} Store Directly ↗`}
+                <Text style={[styles.launchAppBtnTxt, { color: store.buttonText }]}>
+                  {searchItem ? `Launch ${store.name} for "${searchItem}" ↗` : `Launch ${store.name} Store ↗`}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -215,7 +225,7 @@ export default function GroceryDeliveryScreen({ onBack, initialItem = '' }: Groc
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0F17' },
+  container: { flex: 1, backgroundColor: '#F8FAFC' },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -224,113 +234,135 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === 'android' ? 40 : 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
-    backgroundColor: '#0F172A',
+    borderBottomColor: '#E2E8F0',
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
-  backBtn: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, backgroundColor: '#1E293B' },
-  backBtnTxt: { color: '#F8FAFC', fontSize: 14, fontWeight: '600' },
+  backBtn: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, backgroundColor: '#F1F5F9' },
+  backBtnTxt: { color: '#334155', fontSize: 14, fontWeight: '700' },
   headerCenter: { alignItems: 'center' },
-  headerBadge: { color: '#38BDF8', fontSize: 10, fontWeight: '900', letterSpacing: 1, marginBottom: 2 },
-  headerTitle: { color: '#F8FAFC', fontSize: 17, fontWeight: '800' },
+  headerBadge: { color: '#059669', fontSize: 10, fontWeight: '900', letterSpacing: 1, marginBottom: 2 },
+  headerTitle: { color: '#0F172A', fontSize: 17, fontWeight: '800' },
   scrollContent: { padding: 20, paddingBottom: 60 },
 
-  banner: {
+  heroBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#131C2E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 18,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E2E8F0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
   },
-  bannerIconBadge: {
+  heroBadgeIcon: {
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+    backgroundColor: '#ECFDF5',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
-  bannerTitle: { color: '#F8FAFC', fontSize: 16, fontWeight: '800', marginBottom: 4 },
-  bannerSub: { color: '#94A3B8', fontSize: 12.5, lineHeight: 18 },
+  heroTitle: { color: '#0F172A', fontSize: 16, fontWeight: '800', marginBottom: 4 },
+  heroSub: { color: '#64748B', fontSize: 12.5, lineHeight: 18 },
 
-  searchWrap: {
+  searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#131C2E',
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 56,
     borderWidth: 1.5,
-    borderColor: '#38BDF8',
-    marginBottom: 20,
+    borderColor: '#10B981',
+    marginBottom: 22,
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  searchIcon: { fontSize: 18, marginRight: 10 },
-  searchInput: { flex: 1, color: '#F8FAFC', fontSize: 15, fontWeight: '500' },
-  clearBtn: { padding: 6 },
-  clearBtnTxt: { color: '#94A3B8', fontSize: 16, fontWeight: '800' },
+  searchLens: { fontSize: 18, marginRight: 10 },
+  searchInputField: { flex: 1, color: '#0F172A', fontSize: 15, fontWeight: '600' },
+  clearSearchBtn: { padding: 6 },
+  clearSearchTxt: { color: '#94A3B8', fontSize: 16, fontWeight: '800' },
 
-  sectionHeading: { color: '#E2E8F0', fontSize: 15, fontWeight: '800', marginBottom: 14 },
-  chipsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 26 },
-  chipCard: {
+  sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { color: '#1E293B', fontSize: 15, fontWeight: '800', marginBottom: 14 },
+  resetLinkTxt: { color: '#10B981', fontSize: 13, fontWeight: '700' },
+
+  chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 26 },
+  chipItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#131C2E',
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 14,
     paddingVertical: 10,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  chipCardActive: { backgroundColor: 'rgba(56, 189, 248, 0.2)', borderColor: '#38BDF8' },
-  chipEmoji: { fontSize: 16, marginRight: 6 },
-  chipText: { color: '#94A3B8', fontSize: 13, fontWeight: '600' },
-  chipTextActive: { color: '#38BDF8', fontWeight: '800' },
+  chipItemActive: { backgroundColor: '#10B981', borderColor: '#059669' },
+  chipEmojiTxt: { fontSize: 16, marginRight: 6 },
+  chipLabelTxt: { color: '#475569', fontSize: 13, fontWeight: '600' },
+  chipLabelActive: { color: '#FFFFFF', fontWeight: '800' },
 
-  storeList: { gap: 18 },
-  storeCard: {
+  storeCardsList: { gap: 18 },
+  storeCardWrapper: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
-    borderWidth: 1.5,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    shadowOpacity: 0.05,
+    shadowRadius: 14,
+    elevation: 4,
   },
-  storeTopRow: {
+  storeCardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 10,
   },
-  storeBrandRow: { flexDirection: 'row', alignItems: 'center' },
-  storeIcon: { fontSize: 28, marginRight: 12 },
-  storeName: { fontSize: 20, fontWeight: '900', marginBottom: 2 },
-  storeTagline: { color: '#94A3B8', fontSize: 12, fontWeight: '600' },
-  speedBadge: {
+  storeLogoTitleGroup: { flexDirection: 'row', alignItems: 'center' },
+  storeIconEmoji: { fontSize: 28, marginRight: 12 },
+  storeBrandTitle: { fontSize: 19, fontWeight: '800', marginBottom: 2 },
+  storeTaglineTxt: { color: '#64748B', fontSize: 12, fontWeight: '600' },
+  speedTagBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 10,
-    borderWidth: 1,
   },
-  speedBadgeTxt: { fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
-  storeDesc: { color: '#CBD5E1', fontSize: 13, lineHeight: 19, marginBottom: 16 },
+  speedTagTxt: { fontSize: 11, fontWeight: '900', letterSpacing: 0.5 },
+  storeCardDescTxt: { color: '#475569', fontSize: 13, lineHeight: 19, marginBottom: 16 },
 
-  openWebsiteBtn: {
+  launchAppButton: {
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.1,
     shadowRadius: 6,
+    elevation: 2,
   },
-  openWebsiteBtnTxt: { color: '#0F172A', fontSize: 14, fontWeight: '900', letterSpacing: 0.3 }
+  launchAppBtnTxt: { fontSize: 14, fontWeight: '800', letterSpacing: 0.3 }
 });
