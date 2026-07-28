@@ -90,6 +90,104 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
   const [isProcessing, setIsProcessing] = useState(false);
   const [fusion, setFusion] = useState<FusionResult | null>(null);
 
+  const getFallbackRemedy = (query: string): RemedyResult => {
+    const q = query.toLowerCase();
+
+    if (q.includes('weakness') || q.includes('fatigue') || q.includes('tired') || q.includes('energy')) {
+      return {
+        condition: 'General Weakness & Fatigue',
+        medicine: 'Ashwagandha & Date Energy Tonic (Balya Rasayana)',
+        emoji: '⚡',
+        color: '#EAB308',
+        ingredients: [
+          '1 tsp Ashwagandha Powder (Withania somnifera)',
+          '2 Seeded Medjool Dates / Khajur',
+          '1 cup Warm Pure Cow Milk / Almond Milk',
+          '½ tsp Cow Ghee',
+          'Pinch of Cardamom Powder (Elaichi)'
+        ],
+        ingredientCards: [
+          { name: 'Ashwagandha', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' },
+          { name: 'Dates / Khajur', image: 'https://images.unsplash.com/photo-1595855759920-86582396756a?w=500', quantity: '2 pieces' },
+          { name: 'Warm Milk', image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500', quantity: '1 cup' },
+          { name: 'Pure Ghee', image: 'https://images.unsplash.com/photo-1631700611307-37dbab89ef7e?w=500', quantity: '½ tsp' }
+        ],
+        steps: [
+          '🥛 Step 1: Warm 1 cup of fresh milk in a small pan on low flame.',
+          '🌴 Step 2: Deseed 2 dates, chop finely, and add to the milk.',
+          '🌿 Step 3: Stir in 1 tsp Ashwagandha powder, ½ tsp ghee, and a pinch of crushed cardamom.',
+          '🔥 Step 4: Simmer gently on low heat for 5 minutes so dates soften and blend into the milk.',
+          '🌙 Step 5: Drink this warm restorative tonic every night 30 minutes before sleep to rebuild vitality!'
+        ]
+      };
+    }
+
+    if (q.includes('cough') || q.includes('cold') || q.includes('throat') || q.includes('fever')) {
+      return {
+        condition: 'Cough, Cold & Immunity Relief',
+        medicine: 'Sitopaladi & Tulsi-Ginger Immune Kadha',
+        emoji: '🤧',
+        color: '#F97316',
+        ingredients: [
+          '6-8 Fresh Tulsi / Holy Basil Leaves',
+          '1 inch Fresh Crushed Ginger (Adrak)',
+          '½ tsp Turmeric Powder (Haldi)',
+          '4 Black Peppercorns (Kali Mirch)',
+          '1 tbsp Organic Raw Honey'
+        ],
+        ingredientCards: [
+          { name: 'Tulsi Leaves', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '6-8 leaves' },
+          { name: 'Fresh Ginger', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 inch' },
+          { name: 'Organic Honey', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tbsp' }
+        ],
+        steps: [
+          '💧 Step 1: Boil 2 cups of water in a vessel.',
+          '🍃 Step 2: Add crushed ginger, Tulsi leaves, and coarsely crushed black peppercorns.',
+          '🟡 Step 3: Add ½ tsp turmeric powder and boil until water reduces to 1 cup.',
+          '🍯 Step 4: Strain into a cup, allow to cool to warm, and mix in 1 tbsp organic raw honey.',
+          '☕ Step 5: Sip slowly 2-3 times daily for fast respiratory comfort!'
+        ]
+      };
+    }
+
+    return {
+      condition: query.charAt(0).toUpperCase() + query.slice(1),
+      medicine: 'Triphala & Golden Herbal Immunity Brew',
+      emoji: '🌿',
+      color: '#10B981',
+      ingredients: [
+        '1 tsp Triphala Powder',
+        '½ tsp Dry Ginger (Saunth)',
+        '½ tsp Turmeric',
+        '1 tsp Raw Honey',
+        '1 cup Warm Water'
+      ],
+      ingredientCards: [
+        { name: 'Triphala', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500', quantity: '1 tsp' },
+        { name: 'Honey', image: 'https://images.unsplash.com/photo-1587049352847-4a222e784d38?w=500', quantity: '1 tsp' }
+      ],
+      steps: [
+        '💧 Step 1: Mix 1 tsp Triphala powder and ½ tsp turmeric in 1 cup of warm water.',
+        '🍯 Step 2: Add 1 tsp raw honey and stir well until dissolved.',
+        '🍵 Step 3: Sip warm on an empty stomach in the morning or before bedtime for natural balance!'
+      ]
+    };
+  };
+
+  const getFallbackFusion = (text: string): FusionResult => {
+    return {
+      dish: 'Golden Crisp Tawa Leftover Stir-Fry',
+      tags: ['Quick 10-Min', 'Zero Waste', 'Kid Friendly'],
+      steps: [
+        `🍳 Step 1: Heat 1 spoon of oil/butter in a tawa or pan.`,
+        `🧅 Step 2: Toss in chopped onions, tomatoes, and your available leftovers (${text.slice(0, 30)}).`,
+        '🌶️ Step 3: Sprinkle salt, turmeric, cumin powder, and chat masala.',
+        '🔥 Step 4: Sauté on medium-high heat for 5 minutes until crispy and fragrant.',
+        '🍽️ Step 5: Serve hot with lemon juice and enjoy your zero-waste makeover meal!'
+      ]
+    };
+  };
+
   const findRemedy = async (q?: string) => {
     const query = (q ?? problem).trim();
     if (!query) return;
@@ -105,10 +203,10 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
       if (res.ok && json.status === 'success') {
         setRemedy({ condition: json.condition, medicine: json.medicine, emoji: json.emoji, color: json.color, ingredients: json.ingredients, ingredientCards: json.ingredientCards || [], steps: json.steps });
       } else {
-        alert(json.message || 'Could not find a remedy.');
+        setRemedy(getFallbackRemedy(query));
       }
     } catch {
-      alert('Cannot connect to backend server on port 5000.');
+      setRemedy(getFallbackRemedy(query));
     } finally {
       setIsFinding(false);
     }
@@ -128,10 +226,10 @@ export default function HealthAndLeftoverScreen({ onBack }: { onBack: () => void
       if (res.ok && json.status === 'success') {
         setFusion({ dish: json.dish, steps: json.steps, tags: json.tags });
       } else {
-        alert(json.message || 'Could not generate recipe.');
+        setFusion(getFallbackFusion(leftoverText.trim()));
       }
     } catch {
-      alert('Cannot connect to backend server on port 5000.');
+      setFusion(getFallbackFusion(leftoverText.trim()));
     } finally {
       setIsProcessing(false);
     }
