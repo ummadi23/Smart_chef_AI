@@ -363,84 +363,196 @@ export default function GlobalDishFinderScreen() {
             ];
         }
 
+        // 5. UPMA VARIETIES
+        if (qLower.includes('upma') || qLower.includes('uppuma') || qLower.includes('uppittu')) {
+            return [
+                {
+                    id: 'u1',
+                    title: 'Classic South Indian Rava Upma (Sooji Upma)',
+                    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600',
+                    ingredients: [
+                        '1 cup Rava / Sooji (Semolina)',
+                        '2.5 cups Water',
+                        '2 tbsp Desi Ghee or Oil',
+                        '1 tsp Mustard seeds (Rai)',
+                        '1 tsp Chana Dal',
+                        '1 tsp Urad Dal',
+                        '10 Cashew nuts (split)',
+                        '1 inch Fine Ginger (minced)',
+                        '2 Green Chillies (slit)',
+                        '1 Onion (finely chopped)',
+                        '1 sprig Curry Leaves',
+                        'A pinch of Hing (Asafoetida)',
+                        'Salt to taste',
+                        'Fresh Coriander & Lemon juice'
+                    ],
+                    instructions: [
+                        'Step 1: Dry roast 1 cup Rava (semolina) in a pan on medium heat for 4-5 minutes until fragrant (do not brown); transfer to a plate.',
+                        'Step 2: Heat 2 tbsp ghee/oil in the pan. Add 1 tsp mustard seeds, 1 tsp chana dal, 1 tsp urad dal, and split cashews; sauté until golden.',
+                        'Step 3: Add 1 sprig curry leaves, minced ginger, slit green chillies, a pinch of hing, and chopped onions. Sauté until onions turn translucent.',
+                        'Step 4: Pour 2.5 cups water and add 1 tsp salt. Bring water to a rolling boil over high flame.',
+                        'Step 5: Reduce flame to low. Gradually pour roasted rava with one hand while continuously stirring with a spoon to prevent lumps.',
+                        'Step 6: Cover the pan with a lid and steam on low heat for 3 minutes until rava absorbs water and becomes fluffy.',
+                        'Step 7: Sprinkle fresh coriander leaves, squeeze 1 tsp lemon juice, and serve hot with Coconut Chutney or Sambar!'
+                    ]
+                },
+                {
+                    id: 'u2',
+                    title: 'Vegetable Masala Rava Upma',
+                    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600',
+                    ingredients: [
+                        '1 cup Roasted Rava',
+                        '¼ cup Finely Chopped Carrots',
+                        '¼ cup Green Peas',
+                        '¼ cup French Beans',
+                        '1 Chopped Tomato',
+                        '1 Onion (chopped)',
+                        '2.5 cups Water',
+                        '2 tbsp Ghee',
+                        '1 tsp Mustard seeds & Curry leaves'
+                    ],
+                    instructions: [
+                        'Step 1: Dry roast rava until aromatic and set aside.',
+                        'Step 2: Heat ghee in a pan, temper mustard seeds, chana dal, urad dal, curry leaves, and green chillies.',
+                        'Step 3: Sauté onions, carrots, green peas, beans, and tomatoes with a pinch of turmeric for 4 minutes.',
+                        'Step 4: Pour 2.5 cups water, add salt, and bring to a boil so vegetables become tender.',
+                        'Step 5: Slowly add roasted rava while stirring continuously. Cover and steam for 3 minutes.',
+                        'Step 6: Garnish with fresh grated coconut and cilantro; serve hot!'
+                    ]
+                },
+                {
+                    id: 'u3',
+                    title: 'Semya Upma (Vermicelli Upma)',
+                    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600',
+                    ingredients: [
+                        '1 cup Roasted Vermicelli (Semya)',
+                        '2 cups Water',
+                        '1 Finely Chopped Onion',
+                        '2 Green Chillies',
+                        '1 tsp Mustard seeds',
+                        '1 tsp Chana Dal',
+                        '10 Peanuts / Cashews',
+                        'Curry leaves & 2 tbsp Oil'
+                    ],
+                    instructions: [
+                        'Step 1: Roast vermicelli in 1 tsp ghee until golden brown if unroasted.',
+                        'Step 2: Sauté mustard seeds, peanuts, chana dal, curry leaves, ginger, and green chillies in 2 tbsp oil.',
+                        'Step 3: Add chopped onions, sauté until soft, then pour 2 cups water and salt; bring to a rolling boil.',
+                        'Step 4: Add roasted vermicelli, stir well, cover and cook on medium-low heat for 5-6 minutes until water is absorbed.',
+                        'Step 5: Fluff gently with a fork, sprinkle lemon juice, and serve warm!'
+                    ]
+                },
+                {
+                    id: 'u4',
+                    title: 'Bread Upma (Quick 10-Min Snack)',
+                    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600',
+                    ingredients: [
+                        '6 Bread Slices (cubed)',
+                        '1 Chopped Onion',
+                        '1 Chopped Tomato',
+                        '½ tsp Turmeric powder',
+                        '½ tsp Red Chilli powder',
+                        '1 tsp Mustard seeds',
+                        'Curry leaves & 1 tbsp Butter'
+                    ],
+                    instructions: [
+                        'Step 1: Cut 6 bread slices into small 1-inch square cubes.',
+                        'Step 2: Heat 1 tbsp butter or oil in a pan, splutter mustard seeds and curry leaves.',
+                        'Step 3: Add chopped onions, green chillies, and tomatoes; sauté until soft and mushy.',
+                        'Step 4: Add turmeric, red chilli powder, salt, and 2 tbsp water to make a moist masala base.',
+                        'Step 5: Toss in bread cubes, coat well for 2 minutes on high heat, garnish with coriander and serve hot!'
+                    ]
+                },
+                {
+                    id: 'u5',
+                    title: 'Oats Veggie Upma (Low Calorie & Fiber Rich)',
+                    image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600',
+                    ingredients: [
+                        '1 cup Rolled / Instant Oats',
+                        '1.5 cups Water',
+                        '¼ cup Mixed Veggies (Carrot, Peas, Corn)',
+                        '1 Chopped Onion',
+                        '1 tsp Mustard seeds',
+                        '1 tsp Minced Ginger',
+                        'Ghee & Lemon juice'
+                    ],
+                    instructions: [
+                        'Step 1: Dry roast oats in a pan for 2 minutes until warm; set aside.',
+                        'Step 2: Temper mustard seeds, urad dal, green chillies, ginger, and curry leaves in 1 tbsp ghee.',
+                        'Step 3: Sauté onions and mixed vegetables for 3 minutes.',
+                        'Step 4: Add 1.5 cups water, salt, bring to a boil, then stir in roasted oats.',
+                        'Step 5: Cook on low flame for 2-3 minutes until soft and moist. Serve warm!'
+                    ]
+                }
+            ];
+        }
+
         // UNIVERSAL DYNAMIC VARIETY ENGINE FOR ANY INDIAN DISH QUERY (`[Dish]`)
         return [
             {
                 id: `ind_var_1_${Date.now()}`,
-                title: `Punjabi Dhaba-Style ${titleCase}`,
+                title: `Classic Indian-Style ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`500g Primary ingredient for ${titleCase}`, '2 Onions (chopped)', '2 Tomatoes (pureed)', '1 tbsp Ginger-Garlic Paste', '1 tbsp Desi Ghee', '1 tsp Punjabi Garam Masala', '1 tsp Kasuri Methi'],
+                ingredients: [
+                    `Fresh main ingredients for ${titleCase}`,
+                    '1 Chopped Onion',
+                    '1 Chopped Tomato',
+                    '1 tsp Ginger-Garlic Paste',
+                    '1 tsp Mustard seeds & Cumin seeds',
+                    '1 sprig Curry Leaves',
+                    '½ tsp Turmeric & Red Chilli powder',
+                    '2 tbsp Cooking Oil / Desi Ghee',
+                    'Salt & Fresh Coriander'
+                ],
                 instructions: [
-                    `Step 1: Heat 1 tbsp desi ghee in a heavy kadhai and sauté onions until golden brown.`,
-                    'Step 2: Add ginger-garlic paste, tomato puree, red chilli powder, turmeric, and coriander powder.',
-                    'Step 3: Cook masala on medium flame for 7 minutes until oil separates from sides.',
-                    `Step 4: Add ${titleCase} components into the rich masala gravy with 1 cup warm water.`,
-                    'Step 5: Simmer for 12 minutes, finish with crushed Kasuri Methi, and serve hot with tandoori roti!'
+                    `Step 1: Wash and prepare all fresh ingredients required for ${titleCase}.`,
+                    'Step 2: Heat 2 tbsp oil or ghee in a pan; splutter mustard seeds, cumin seeds, and curry leaves.',
+                    'Step 3: Sauté finely chopped onions and ginger-garlic paste until golden brown.',
+                    'Step 4: Add tomatoes, turmeric, red chilli powder, and salt; cook until tomatoes turn soft.',
+                    `Step 5: Add main ${titleCase} ingredients, sprinkle 2 tbsp water if needed, cover and cook on medium flame for 8-10 minutes until tender.`,
+                    'Step 6: Garnish with fresh coriander leaves, a dash of lemon juice, and serve piping hot!'
                 ]
             },
             {
                 id: `ind_var_2_${Date.now()}`,
-                title: `South Indian Chettinad Spiced ${titleCase}`,
+                title: `Punjabi Dhaba-Style ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Main ingredient for ${titleCase}`, '2 tbsp Chettinad Masala (Fennel, Black Pepper, Star Anise)', '10 Small Shallots', '2 sprigs Curry Leaves', '2 tbsp Gingelly / Coconut Oil'],
+                ingredients: [
+                    `Fresh ingredients for ${titleCase}`,
+                    '2 Onions (chopped)',
+                    '2 Tomatoes (pureed)',
+                    '1 tbsp Ginger-Garlic Paste',
+                    '1 tbsp Desi Ghee',
+                    '1 tsp Punjabi Garam Masala',
+                    '1 tsp Kasuri Methi'
+                ],
                 instructions: [
-                    'Step 1: Dry roast fennel seeds, peppercorns, coriander seeds, and dry red chillies; grind into fresh Chettinad spice powder.',
-                    'Step 2: Heat coconut oil in a pan, temper mustard seeds, curry leaves, and small shallots.',
-                    `Step 3: Toss in ${titleCase} with fresh Chettinad masala powder and turmeric.`,
-                    'Step 4: Roast on low flame until rich black-brown spices coat every piece.',
-                    'Step 5: Garnish with fresh curry leaves and serve hot with steamed rice or dosa!'
+                    'Step 1: Heat 1 tbsp desi ghee in a heavy kadhai and sauté onions until golden brown.',
+                    'Step 2: Add ginger-garlic paste, tomato puree, red chilli powder, turmeric, and coriander powder.',
+                    'Step 3: Cook masala on medium flame for 7 minutes until oil separates from sides.',
+                    `Step 4: Add ${titleCase} components into the rich masala gravy with 1 cup warm water.`,
+                    'Step 5: Simmer for 12 minutes, finish with crushed Kasuri Methi, and serve hot with naan or paratha!'
                 ]
             },
             {
                 id: `ind_var_3_${Date.now()}`,
-                title: `Hyderabadi Royal Dum ${titleCase}`,
+                title: `South Indian Spiced ${titleCase}`,
                 image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Selected ${titleCase}`, '1 cup Fried Golden Onions (Birista)', '1 cup Whisked Curd', '1 tbsp Mint Leaves', '1 tsp Shahi Jeera', 'Saffron Milk & Ghee'],
+                ingredients: [
+                    `Main ingredient for ${titleCase}`,
+                    '1 tsp Mustard Seeds',
+                    '1 tsp Chana Dal & Urad Dal',
+                    '2 sprigs Fresh Curry Leaves',
+                    '2 Green Chillies (slit)',
+                    '2 tbsp Coconut Oil / Ghee',
+                    'Fresh Grated Coconut'
+                ],
                 instructions: [
-                    `Step 1: Marinate ${titleCase} with curd, ginger-garlic paste, mint, fried onions, and Shahi biryani masala for 30 minutes.`,
-                    'Step 2: Place marinated mixture in a heavy copper handi.',
-                    'Step 3: Drizzle pure ghee and saffron infused milk over the top.',
-                    'Step 4: Seal handi with dough and cook on slow dum heat for 20 minutes.',
-                    'Step 5: Unseal and serve hot for a royal Hyderabadi feast!'
-                ]
-            },
-            {
-                id: `ind_var_4_${Date.now()}`,
-                title: `Mughlai Shahi Creamy ${titleCase}`,
-                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Fresh ${titleCase}`, '10 Cashews (ground to paste)', '2 tbsp Heavy Cream', '1 tbsp Ghee', 'Whole Cardamom & Cloves', 'Saffron strands'],
-                instructions: [
-                    'Step 1: Melt ghee in a pan and temper green cardamom, cloves, and bay leaf.',
-                    'Step 2: Add smooth cashew paste, boiled onion paste, and white pepper powder.',
-                    `Step 3: Fold in ${titleCase} and cook gently on low flame.`,
-                    'Step 4: Swirl in heavy fresh cream and saffron milk.',
-                    'Step 5: Garnish with slivered almonds and serve warm with garlic butter naan!'
-                ]
-            },
-            {
-                id: `ind_var_5_${Date.now()}`,
-                title: `Crispy Street-Style Tawa Fry ${titleCase}`,
-                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Portioned ${titleCase}`, '1 tbsp Rice Flour', '1 tbsp Cornflour', '1 tsp Chaat Masala', '1 Lemon', 'Oil for frying'],
-                instructions: [
-                    `Step 1: Coat ${titleCase} thoroughly with rice flour, cornflour, red chilli powder, salt, and lemon juice.`,
-                    'Step 2: Heat 2 tbsp oil on a flat iron tawa.',
-                    `Step 3: Shallow fry ${titleCase} on medium heat until outer crust turns golden and crispy.`,
-                    'Step 4: Flip halfway and sprinkle chaat masala.',
-                    'Step 5: Serve sizzling hot with green mint chutney and lemon wedges!'
-                ]
-            },
-            {
-                id: `ind_var_6_${Date.now()}`,
-                title: `Rajasthani Spiced Kadai ${titleCase}`,
-                image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600',
-                ingredients: [`Prepared ${titleCase}`, '2 Mathania Dry Red Chillies', '1 tsp Coriander Seeds', '1 tbsp Ghee', '1 tsp Amchur (Dry Mango Powder)', 'Coriander'],
-                instructions: [
-                    'Step 1: Heat ghee in a kadai and add whole dry Mathania red chillies and crushed coriander seeds.',
-                    `Step 2: Add ${titleCase} and sauté on high heat until aromatic.`,
-                    'Step 3: Add tomato gravy, amchur powder, and salt.',
-                    'Step 4: Cook until gravy thickens and coats the dish.',
-                    'Step 5: Serve hot with bajra roti or missi roti!'
+                    'Step 1: Heat 2 tbsp coconut oil in a pan; add mustard seeds, chana dal, urad dal, and curry leaves.',
+                    'Step 2: Add green chillies and onions; sauté until translucent.',
+                    `Step 3: Add prepared ${titleCase} ingredients, turmeric, and salt; toss gently.`,
+                    'Step 4: Cover and steam on low flame for 6-8 minutes until cooked through.',
+                    'Step 5: Top with fresh grated coconut and serve hot!'
                 ]
             }
         ];
