@@ -11,7 +11,7 @@ interface BottomNavBarProps {
 export default function BottomNavBar({ activeTab, onTabChange }: BottomNavBarProps) {
   const tabs: { id: TabType; icon: string; label: string }[] = [
     { id: 'home', icon: '🏠', label: 'Home' },
-    { id: 'scan', icon: '📸', label: 'Scan' },
+    { id: 'scan', icon: '📋', label: 'Checklist' },
     { id: 'ayurveda', icon: '🌿', label: 'Ayurveda' },
     { id: 'leftovers', icon: '♻️', label: 'Leftovers' },
     { id: 'community', icon: '👥', label: 'Social' },

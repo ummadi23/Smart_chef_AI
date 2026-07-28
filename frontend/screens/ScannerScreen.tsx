@@ -1,59 +1,145 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
-  StyleSheet, Text, View, TouchableOpacity, ScrollView,
-  ActivityIndicator, TextInput, Platform, Linking, Image, Alert,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  TextInput,
+  Platform,
+  Linking,
+  Image,
+  Alert,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
 import { getApiBaseUrl } from '../config';
-import { runFridgeScan, DetectedItem } from '../fridgeVision';
 
+// ── Categorized Grocery Database ──────────────────────────────────────────────
+export interface CategorizedIngredients {
+  category: string;
+  icon: string;
+  items: string[];
+}
 
-
-
-// ── Image Compressor Helper ──────────────────────────────────────────────────
-// ── Image Compressor Helper ──────────────────────────────────────────────────
-const compressAndOptimizePhoto = async (photoUri: string): Promise<string> => {
-  try {
-    const startTime = Date.now();
-    const manipResult = await ImageManipulator.manipulateAsync(
-      photoUri,
-      [{ resize: { width: 1024 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-    );
-    const base64Str = manipResult.base64 ? `data:image/jpeg;base64,${manipResult.base64}` : photoUri;
-    const duration = Date.now() - startTime;
-    console.log(`📸 [IMAGE COMPRESSOR] Max Dimension: 1024px | Quality: 70% | Size: ${Math.round(base64Str.length / 1024)} KB | Prep Time: ${duration}ms`);
-    return base64Str;
-  } catch (err) {
-    console.warn('Image manipulation fallback warning:', err);
-    return photoUri;
+export const CATEGORIZED_INGREDIENTS: CategorizedIngredients[] = [
+  {
+    category: 'Vegetables & Greens',
+    icon: '🥬',
+    items: [
+      'Tomato', 'Potato', 'Red Onion', 'White Onion', 'Garlic', 'Ginger',
+      'Spinach (Palak)', 'Capsicum (Bell Pepper)', 'Red Bell Pepper', 'Yellow Bell Pepper',
+      'Broccoli', 'Carrot', 'Cauliflower (Gobi)', 'Cucumber', 'Green Chili', 'Red Chili',
+      'Green Peas', 'Button Mushroom', 'Portobello Mushroom', 'Eggplant (Brinjal)',
+      'Zucchini', 'Coriander / Cilantro', 'Mint (Pudina)', 'Cabbage', 'Sweet Potato',
+      'Pumpkin', 'Bottle Gourd (Lauki)', 'Ridge Gourd (Turai)', 'Bitter Gourd (Karela)',
+      'Drumstick (Moringa)', 'Okra (Lady Finger / Bhindi)', 'Radish (Mooli)', 'Turnip',
+      'Beetroot', 'Curry Leaves', 'Methi (Fenugreek Leaves)', 'Spring Onion',
+      'Baby Corn', 'Corn / Maize', 'Asparagus', 'Celery', 'Lettuce', 'Kale',
+      'French Beans', 'Cluster Beans (Gavar)', 'Taro / Arbi', 'Yam'
+    ]
+  },
+  {
+    category: 'Dairy & Plant Proteins',
+    icon: '🧀',
+    items: [
+      'Milk', 'Full Cream Milk', 'Skimmed Milk', 'Paneer (Cottage Cheese)',
+      'Butter', 'Unsalted Butter', 'Curd / Yogurt', 'Greek Yogurt',
+      'Cheddar Cheese', 'Mozzarella Cheese', 'Parmesan Cheese', 'Cheese Slices',
+      'Eggs', 'Tofu (Soy Paneer)', 'Heavy Cream', 'Fresh Cream', 'Sour Cream',
+      'Ghee (Clarified Butter)', 'Coconut Milk', 'Coconut Cream', 'Almond Milk',
+      'Soy Milk', 'Oat Milk', 'Buttermilk (Chaas)', 'Khoya / Mawa', 'Condensed Milk'
+    ]
+  },
+  {
+    category: 'Spices, Herbs & Seasonings',
+    icon: '🌶️',
+    items: [
+      'Salt', 'Rock Salt (Kala Namak)', 'Turmeric (Haldi)', 'Cumin Seeds (Jeera)',
+      'Cumin Powder', 'Red Chili Powder', 'Kashmiri Chili Powder', 'Coriander Powder (Dhania)',
+      'Garam Masala', 'Black Pepper', 'Mustard Seeds (Rai)', 'Cardamom (Elaichi)',
+      'Black Cardamom', 'Cinnamon (Dalchini)', 'Cloves (Laung)', 'Star Anise',
+      'Bay Leaf (Tejpatta)', 'Asafoetida (Hing)', 'Oregano', 'Dried Basil',
+      'Fresh Basil', 'Rosemary', 'Thyme', 'Parsley', 'Carom Seeds (Ajwain)',
+      'Fennel Seeds (Saunf)', 'Fenugreek Seeds (Methi)', 'Nutmeg (Jaiphal)', 'Paprika',
+      'Chili Flakes', 'Soy Sauce', 'Dark Soy Sauce', 'Vinegar', 'Apple Cider Vinegar',
+      'Hot Sauce', 'Sriracha', 'Tomato Ketchup', 'Tamarind Paste', 'Garlic Powder',
+      'Chaat Masala', 'Amchur (Dry Mango)', 'Kasuri Methi', 'Curry Powder', 'Italian Seasoning'
+    ]
+  },
+  {
+    category: 'Meat, Poultry & Seafood',
+    icon: '🥩',
+    items: [
+      'Chicken', 'Chicken Breast', 'Chicken Thighs', 'Chicken Wings',
+      'Ground Chicken (Keema)', 'Mutton / Lamb', 'Mutton Keema', 'Beef Steak',
+      'Pork Chops', 'Bacon', 'Sausages', 'Ham', 'Eggs (Hen)',
+      'Fish Fillet', 'Salmon', 'Tuna', 'Tilapia', 'Mackerel', 'Pomfret',
+      'Prawns / Shrimp', 'Crab', 'Lobster', 'Squid / Calamari'
+    ]
+  },
+  {
+    category: 'Grains, Pulses & Staples',
+    icon: '🌾',
+    items: [
+      'White Rice', 'Basmati Rice', 'Brown Rice', 'Sona Masoori Rice',
+      'Poha (Flaked Rice)', 'Atta (Whole Wheat Flour)', 'Maida (All-Purpose Flour)',
+      'Besan (Gram Flour)', 'Sooji / Rava (Semolina)', 'Cornflour / Cornstarch',
+      'Rice Flour', 'Ragi Flour', 'Oats', 'Quinoa', 'Bread (White)',
+      'Brown Bread', 'Pav / Buns', 'Pasta (Penne)', 'Pasta (Spaghetti)',
+      'Macaroni', 'Noodles / Maggi', 'Vermicelli (Sevai)', 'Chickpeas (Kabuli Chana)',
+      'Kala Chana', 'Toor Dal (Arhar)', 'Moong Dal (Yellow)', 'Moong Dal (Green)',
+      'Masoor Dal (Red)', 'Urad Dal', 'Rajma (Kidney Beans)', 'Soybeans',
+      'Cooking Oil', 'Sunflower Oil', 'Olive Oil', 'Mustard Oil', 'Coconut Oil', 'Groundnut Oil', 'Sesame Oil'
+    ]
+  },
+  {
+    category: 'Fruits, Nuts & Extras',
+    icon: '🍎',
+    items: [
+      'Lemon / Lime', 'Apple', 'Green Apple', 'Banana', 'Orange',
+      'Sweet Lime (Mosambi)', 'Mango', 'Strawberry', 'Blueberry', 'Grapes',
+      'Watermelon', 'Pineapple', 'Papaya', 'Pomegranate', 'Guava',
+      'Kiwi', 'Dates (Khajoor)', 'Cashews (Kaju)', 'Almonds (Badam)',
+      'Walnuts', 'Pistachios', 'Peanuts', 'Raisins (Kishmish)', 'Pumpkin Seeds',
+      'Chia Seeds', 'Flaxseeds', 'Sesame Seeds', 'Honey', 'Maple Syrup',
+      'Sugar', 'Brown Sugar', 'Jaggery (Gud)', 'Grated Coconut', 'Dark Chocolate', 'Vanilla Extract'
+    ]
   }
-};
+];
+
+// Flat list of master ingredients dynamically constructed from all categories
+export const MASTER_SUGGESTIONS: string[] = Array.from(
+  new Set(CATEGORIZED_INGREDIENTS.flatMap(cat => cat.items))
+).sort((a, b) => a.localeCompare(b));
 
 const getIngredientEmoji = (name: string): string => {
   const lower = name.toLowerCase();
   if (lower.includes('tomato')) return '🍅';
   if (lower.includes('onion')) return '🧅';
   if (lower.includes('garlic')) return '🧄';
-  if (lower.includes('green') || lower.includes('mint') || lower.includes('spinach') || lower.includes('lettuce') || lower.includes('herbs')) return '🥬';
-  if (lower.includes('pepper') || lower.includes('capsicum')) return '🫑';
-  if (lower.includes('orange')) return '🍊';
-  if (lower.includes('strawberry') || lower.includes('berries')) return '🍓';
+  if (lower.includes('spinach') || lower.includes('mint') || lower.includes('coriander') || lower.includes('cabbage') || lower.includes('lettuce') || lower.includes('kale') || lower.includes('methi')) return '🥬';
+  if (lower.includes('capsicum') || lower.includes('bell pepper') || lower.includes('pepper')) return '🫑';
   if (lower.includes('broccoli')) return '🥦';
-  if (lower.includes('apple')) return '🍎';
-  if (lower.includes('chicken') || lower.includes('poultry') || lower.includes('meat')) return '🍗';
-  if (lower.includes('egg')) return '🥚';
-  if (lower.includes('milk') || lower.includes('yogurt') || lower.includes('curd') || lower.includes('dairy')) return '🥛';
-  if (lower.includes('cheese')) return '🧀';
-  if (lower.includes('butter') || lower.includes('ghee')) return '🧈';
-  if (lower.includes('bread') || lower.includes('toast')) return '🍞';
   if (lower.includes('carrot')) return '🥕';
-  if (lower.includes('cucumber') || lower.includes('zucchini')) return '🥒';
-  if (lower.includes('potato')) return '🥔';
+  if (lower.includes('cauliflower') || lower.includes('gobi')) return '🥦';
+  if (lower.includes('cucumber') || lower.includes('zucchini') || lower.includes('gourd')) return '🥒';
+  if (lower.includes('potato') || lower.includes('yam') || lower.includes('arbi')) return '🥔';
+  if (lower.includes('corn')) return '🌽';
+  if (lower.includes('eggplant') || lower.includes('brinjal') || lower.includes('baingan')) return '🍆';
+  if (lower.includes('mushroom')) return '🍄';
   if (lower.includes('lemon') || lower.includes('lime')) return '🍋';
-  if (lower.includes('container') || lower.includes('jar') || lower.includes('sauces')) return '🫙';
-  return '🥦';
+  if (lower.includes('chicken') || lower.includes('mutton') || lower.includes('beef') || lower.includes('pork') || lower.includes('meat') || lower.includes('sausage') || lower.includes('bacon')) return '🍗';
+  if (lower.includes('fish') || lower.includes('salmon') || lower.includes('tuna') || lower.includes('prawn') || lower.includes('crab') || lower.includes('lobster') || lower.includes('squid')) return '🐟';
+  if (lower.includes('egg')) return '🥚';
+  if (lower.includes('milk') || lower.includes('curd') || lower.includes('yogurt') || lower.includes('cream')) return '🥛';
+  if (lower.includes('cheese') || lower.includes('paneer') || lower.includes('tofu')) return '🧀';
+  if (lower.includes('butter') || lower.includes('ghee')) return '🧈';
+  if (lower.includes('bread') || lower.includes('pasta') || lower.includes('noodle') || lower.includes('bun') || lower.includes('macaroni')) return '🍝';
+  if (lower.includes('rice') || lower.includes('poha')) return '🍚';
+  if (lower.includes('chili') || lower.includes('paprika') || lower.includes('spice') || lower.includes('masala') || lower.includes('sauce') || lower.includes('salt') || lower.includes('turmeric') || lower.includes('cumin')) return '🌶️';
+  if (lower.includes('apple') || lower.includes('banana') || lower.includes('mango') || lower.includes('orange') || lower.includes('berry') || lower.includes('grape') || lower.includes('melon') || lower.includes('pineapple') || lower.includes('fruit')) return '🍎';
+  if (lower.includes('cashew') || lower.includes('almond') || lower.includes('walnut') || lower.includes('pistachio') || lower.includes('peanut') || lower.includes('seed') || lower.includes('raisin')) return '🥜';
+  return '🥗';
 };
 
 interface Dish {
@@ -64,6 +150,8 @@ interface Dish {
   usedIngredients: string[];
   missingIngredients: string[];
   instructions: string[];
+  calories?: string;
+  difficulty?: string;
 }
 
 interface SuggestResult {
@@ -75,178 +163,54 @@ interface SuggestResult {
 export default function ScannerScreen({ onBack }: { onBack: () => void }) {
   const [inputText, setInputText] = useState('');
   const [ingredients, setIngredients] = useState<string[]>([]);
-  const [detectedObjects, setDetectedObjects] = useState<Array<{ name: string; score?: number; box?: { top: number; left: number; width: number; height: number } }>>([]);
   const [language, setLanguage] = useState<'English' | 'Telugu'>('English');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SuggestResult | null>(null);
   const [selectedDish, setSelectedDish] = useState(0);
-  const [expandedMissing, setExpandedMissing] = useState<string | null>(null);
-  const [isScanningFridge, setIsScanningFridge] = useState(false);
-  const [fridgeScanMessage, setFridgeScanMessage] = useState<string | null>(null);
-  const [fridgePhotoUri, setFridgePhotoUri] = useState<string | null>(null);
+  const [collapsedCategories, setCollapsedCategories] = useState<{ [key: string]: boolean }>({});
+  const [viewMode, setViewMode] = useState<'selection' | 'recipes'>('selection');
+  const [maxTime, setMaxTime] = useState<'all' | '5' | '10' | '15' | '30'>('all');
   const inputRef = useRef<TextInput>(null);
 
-  // ── Ingredients Vision Scanner AI ───────────────────────────────────────
-  const handleScanFridge = async (imagePayload?: string) => {
-    if (!imagePayload) {
-      Alert.alert('Image Missing', 'Please select or take a clear photo of your ingredients.');
-      return;
-    }
+  // ── Smart Auto-Complete Filter ──────────────────────────────────────────────
+  const autocompleteSuggestions = useMemo(() => {
+    const query = inputText.trim().toLowerCase();
+    if (!query) return [];
 
-    const targetUrl = `${getApiBaseUrl()}/api/recipes/scan-fridge`;
-    const payloadBytes = imagePayload.length;
-    const startTime = Date.now();
-    const imageHashSignature = imagePayload.slice(-30);
-    console.log(`📸 [SCAN TRIGGERED] Base64 Hash: ${imageHashSignature} | Size: ${Math.round(payloadBytes / 1024)} KB | Target: ${targetUrl}`);
-
-    setIsScanningFridge(true);
-    setIngredients([]); // Clear previous ingredients
-    setDetectedObjects([]); // Clear previous bounding box objects
-    setResult(null); // Clear previous recipe suggestions
-    setFridgeScanMessage(
-      language === 'Telugu'
-        ? '🔍 AI విజన్ పదార్థాల ఫోటోని విశ్లేషిస్తోంది...'
-        : '🔍 AI Vision Analyzing Your Ingredients Photo...'
-    );
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s generous timeout
-
-    try {
-      const response = await fetch(targetUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: imagePayload, language }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-      const requestDuration = Date.now() - startTime;
-      console.log(`⏱️ [INGREDIENTS SCAN TIMING] Completed in ${requestDuration}ms with status HTTP ${response.status}`);
-
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP ${response.status}`);
-      }
-
-      const json = await response.json();
-      const rawDetected = json.items || json.detectedItems || json.detectedIngredients || [];
-      const itemNames = rawDetected.map((i: any) => typeof i === 'string' ? i : i.name).filter(Boolean);
-
-      if (itemNames.length > 0) {
-        setIngredients(itemNames);
-        setDetectedObjects(json.objects || rawDetected.map((n: string) => ({ name: n })));
-        setFridgeScanMessage(`✅ Detected ${itemNames.length} ingredients! Generating recipes...`);
-        await getRecipeSuggestions(itemNames);
-      } else {
-        // Fallback default detected items if image response was empty
-        const fallbackItems = ['Tomatoes', 'Onions', 'Garlic', 'Green Chillies', 'Paneer'];
-        setIngredients(fallbackItems);
-        setFridgeScanMessage(`✅ AI Vision detected ingredients! Generating recipes...`);
-        await getRecipeSuggestions(fallbackItems);
-      }
-    } catch (err: any) {
-      clearTimeout(timeoutId);
-      console.warn('Scan ingredients error, applying smart recovery:', err.message || err);
-      const fallbackItems = ['Tomatoes', 'Onions', 'Garlic', 'Green Chillies', 'Paneer'];
-      setIngredients(fallbackItems);
-      setFridgeScanMessage(`✅ AI Vision detected ingredients! Generating recipes...`);
-      await getRecipeSuggestions(fallbackItems);
-    } finally {
-      setIsScanningFridge(false);
-    }
-  };
-
-  // ── Native Camera & Gallery Shutter Handlers ────────────────────────────────
-  const takeLiveFridgePhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Camera access is needed to take a photo of your fridge.');
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ['images'],
-        quality: 0.8,
-        allowsEditing: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const photo = result.assets[0];
-        setFridgePhotoUri(photo.uri);
-        const optimizedBase64 = await compressAndOptimizePhoto(photo.uri);
-
-
-        handleScanFridge(optimizedBase64);
-      }
-    } catch (err) {
-      Alert.alert('Camera Error', 'Could not open camera. Please try gallery selection.');
-    }
-  };
-
-  const pickFridgeGalleryPhoto = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Gallery access is needed to choose a fridge photo.');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        quality: 0.8,
-        allowsEditing: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets[0]) {
-        const photo = result.assets[0];
-        setFridgePhotoUri(photo.uri);
-        const optimizedBase64 = await compressAndOptimizePhoto(photo.uri);
-        handleScanFridge(optimizedBase64);
-      }
-    } catch (err) {
-      Alert.alert('Gallery Error', 'Could not open gallery. Please try again.');
-    }
-  };
-
-  const handleFridgeImageUpload = (useCamera: boolean = false) => {
-    if (typeof document !== 'undefined') {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      if (useCamera) {
-        input.setAttribute('capture', 'environment');
-      }
-      input.onchange = (e: any) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const base64 = event.target?.result as string;
-            setFridgePhotoUri(base64);
-            handleScanFridge(base64);
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-      input.click();
-    }
-  };
-
-  // ── Add an ingredient tag ──────────────────────────────────────────────────
-  const addIngredient = () => {
-    const trimmed = inputText.trim();
-    if (!trimmed) return;
-    // Allow comma-separated input: "tomato, onion, egg"
-    const parts = trimmed.split(',').map(p => p.trim()).filter(Boolean);
-    const newList = [...ingredients];
-    parts.forEach(p => {
-      if (p && !newList.map(i => i.toLowerCase()).includes(p.toLowerCase())) {
-        newList.push(p);
-      }
+    const matches = MASTER_SUGGESTIONS.filter(item => {
+      const itemLower = item.toLowerCase();
+      const isAlreadySelected = ingredients.some(sel => sel.toLowerCase() === itemLower);
+      return !isAlreadySelected && itemLower.includes(query);
     });
-    setIngredients(newList);
+
+    return matches.sort((a, b) => {
+      const aStartsWith = a.toLowerCase().startsWith(query);
+      const bStartsWith = b.toLowerCase().startsWith(query);
+      if (aStartsWith && !bStartsWith) return -1;
+      if (!aStartsWith && bStartsWith) return 1;
+      return a.localeCompare(b);
+    }).slice(0, 8);
+  }, [inputText, ingredients]);
+
+  // ── Add Ingredient Tag ─────────────────────────────────────────────────────
+  const addIngredientByName = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    
+    if (!ingredients.some(i => i.toLowerCase() === trimmed.toLowerCase())) {
+      setIngredients(prev => [...prev, trimmed]);
+    }
     setInputText('');
+    setResult(null);
+  };
+
+  const toggleChecklistItem = (item: string) => {
+    const existingIndex = ingredients.findIndex(i => i.toLowerCase() === item.toLowerCase());
+    if (existingIndex >= 0) {
+      setIngredients(prev => prev.filter((_, idx) => idx !== existingIndex));
+    } else {
+      setIngredients(prev => [...prev, item]);
+    }
     setResult(null);
   };
 
@@ -260,35 +224,403 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
     setInputText('');
     setResult(null);
     setSelectedDish(0);
-    setExpandedMissing(null);
   };
 
-  // ── Submit to backend ──────────────────────────────────────────────────────
+  const toggleCategoryCollapse = (catName: string) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [catName]: !prev[catName]
+    }));
+  };
+
+  // ── Recipe Search ──────────────────────────────────────────────────────────
   const findRecipes = async () => {
-    if (ingredients.length === 0) return;
+    if (ingredients.length === 0) {
+      Alert.alert('No Ingredients Selected', 'Please select or search at least one ingredient you have in your kitchen.');
+      return;
+    }
+
     setIsLoading(true);
     setResult(null);
     setSelectedDish(0);
-    setExpandedMissing(null);
+    setViewMode('recipes'); // Switch to Next Screen (Recipe Results Screen)
 
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/recipes/suggest-by-ingredients`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingredients, language }),
+        body: JSON.stringify({ ingredients, language, maxTime }),
       });
-      const json = await response.json();
-      const payload = json.data || json;
-      setResult(payload);
+
+      if (response.ok) {
+        const json = await response.json();
+        const payload = json.data || json;
+        if (payload && Array.isArray(payload.dishes) && payload.dishes.length > 0) {
+          setResult(payload);
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      generateFallbackRecipes(ingredients, maxTime);
     } catch (err) {
-      setResult({
-        status: 'error',
-        message: '⚠️ Could not reach the server. Make sure the backend is running on port 5000.',
-        dishes: [],
-      });
+      generateFallbackRecipes(ingredients, maxTime);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const generateFallbackRecipes = (selected: string[], timeLimit: string = maxTime) => {
+    const lowerSelected = selected.map(i => i.toLowerCase());
+
+    // ── 1. FIVE MINUTE DISHES (5 Mins) ─────────────────────────────────────────
+    const fiveMinDishes: Dish[] = [
+      {
+        title: '5-Min South Indian Curd Rice (Daddojanam)',
+        category: 'Quick Lunch / Snack',
+        cuisine: 'South Indian',
+        prepTime: '5 mins',
+        calories: '210 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('rice') || l.includes('curd') || l.includes('mustard') || l.includes('salt');
+        }),
+        missingIngredients: ['Mustard Seeds', 'Curry Leaves', 'Salt'],
+        instructions: [
+          '🍚 Step 1: Put 1 bowl of cooked rice in a mixing bowl and gently mash with a spoon.',
+          '🥛 Step 2: Pour 1 cup of fresh curd/yogurt over the rice and add a pinch of salt. Mix well.',
+          '🧄 Step 3: Heat 1 tsp ghee/oil in a small pan. Add mustard seeds and curry leaves until crackling.',
+          '💥 Step 4: Carefully pour the warm ghee tadka into the curd rice.',
+          '😋 Step 5: Mix well and enjoy delicious 5-minute cool South Indian Curd Rice!'
+        ]
+      },
+      {
+        title: '5-Min Quick Tomato Masala Rice',
+        category: 'Quick Lunch',
+        cuisine: 'South Indian',
+        prepTime: '5 mins',
+        calories: '240 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('rice') || l.includes('tomato') || l.includes('onion') || l.includes('oil');
+        }),
+        missingIngredients: ['Mustard Seeds', 'Turmeric', 'Salt'],
+        instructions: [
+          '🍅 Step 1: Chop 1 tomato and 1/2 onion into small pieces.',
+          '🍳 Step 2: Heat 1 spoon of oil in a pan for 30 seconds; sauté onions and tomatoes with salt.',
+          '🔥 Step 3: Stir-fry for 2 minutes until tomatoes get soft.',
+          '🍚 Step 4: Add your cooked rice, toss together for 1.5 minutes on medium heat.',
+          '🍽️ Step 5: Enjoy hot 5-minute Tomato Rice!'
+        ]
+      },
+      {
+        title: '5-Min Dhaba Egg Bhurji (Scrambled Eggs)',
+        category: 'Quick Breakfast',
+        cuisine: 'Indian Street Food',
+        prepTime: '5 mins',
+        calories: '220 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('egg') || l.includes('onion') || l.includes('tomato') || l.includes('butter');
+        }),
+        missingIngredients: ['Butter / Oil', 'Salt', 'Black Pepper'],
+        instructions: [
+          '🥚 Step 1: Crack 2 eggs into a bowl, add salt and pepper, and whisk with a fork.',
+          '🧈 Step 2: Melt 1 spoon of butter in a pan on medium heat.',
+          '🧅 Step 3: Sauté diced onions and tomatoes for 1 minute.',
+          '🍳 Step 4: Pour in beaten eggs and scramble with a spoon for 2 minutes until fluffy.',
+          '🍞 Step 5: Serve hot 5-minute Egg Bhurji!'
+        ]
+      },
+      {
+        title: '5-Min Quick Tawa Paneer Bhurji',
+        category: 'Quick Main Course',
+        cuisine: 'North Indian',
+        prepTime: '5 mins',
+        calories: '290 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('paneer') || l.includes('onion') || l.includes('tomato') || l.includes('butter');
+        }),
+        missingIngredients: ['Butter / Ghee', 'Turmeric', 'Salt'],
+        instructions: [
+          '🧀 Step 1: Crumble soft paneer with your fingers into small pieces.',
+          '🍳 Step 2: Heat 1 spoon of butter in a pan; sauté onions and tomatoes for 1.5 minutes.',
+          '🥫 Step 3: Add a pinch of turmeric, salt, and red chili powder.',
+          '🔥 Step 4: Toss in crumbled paneer and stir on medium heat for 2 minutes.',
+          '🍽️ Step 5: Serve hot 5-minute Paneer Bhurji!'
+        ]
+      },
+      {
+        title: `5-Min Indian Kachumber Salad (${selected[0] || 'Veggie'} Special)`,
+        category: 'Quick Healthy Snack',
+        cuisine: 'Indian',
+        prepTime: '5 mins',
+        calories: '120 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected,
+        missingIngredients: ['Lemon Juice', 'Chat Masala', 'Salt'],
+        instructions: [
+          `🔪 Step 1: Chop your available vegetables (${selected.slice(0, 4).join(', ')}) into small crunchy cubes.`,
+          '🥣 Step 2: Put all chopped veggies in a clean salad bowl.',
+          '🍋 Step 3: Squeeze fresh lemon juice over the veggies.',
+          '🌶️ Step 4: Sprinkle a pinch of salt, chat masala, and black pepper.',
+          '🥗 Step 5: Toss well with a spoon and enjoy instant fresh 5-minute Kachumber Salad!'
+        ]
+      }
+    ];
+
+    // ── 2. TEN MINUTE DISHES (10 Mins) ─────────────────────────────────────────
+    const tenMinDishes: Dish[] = [
+      {
+        title: '10-Min Fast Tawa Paneer Masala Fry',
+        category: 'Quick Dinner',
+        cuisine: 'North Indian',
+        prepTime: '10 mins',
+        calories: '320 kcal',
+        difficulty: 'Medium',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('paneer') || l.includes('onion') || l.includes('capsicum') || l.includes('tomato');
+        }),
+        missingIngredients: ['Kadhai Masala', 'Ghee', 'Kasuri Methi'],
+        instructions: [
+          '🧀 Step 1: Slice paneer into thin strips. Sauté onion and capsicum in 1 tbsp ghee for 2 mins.',
+          '🍅 Step 2: Add tomato paste, turmeric, garlic, and chili powder; cook for 3 mins.',
+          '🥘 Step 3: Toss in paneer strips and sizzle on high flame for 4 mins.',
+          '🍽️ Step 4: Garnish with cilantro and serve warm 10-minute Tawa Paneer!'
+        ]
+      },
+      {
+        title: '10-Min Quick Egg Masala Fry',
+        category: 'Quick Meal',
+        cuisine: 'Indian Street Food',
+        prepTime: '10 mins',
+        calories: '260 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('egg') || l.includes('onion') || l.includes('tomato') || l.includes('garlic');
+        }),
+        missingIngredients: ['Garam Masala', 'Oil', 'Turmeric'],
+        instructions: [
+          '🥚 Step 1: Boil 2 eggs in hot water for 6 mins; peel and slice in half.',
+          '🍳 Step 2: Sauté onions, garlic, and tomatoes in a pan for 2 mins.',
+          '🌶️ Step 3: Add cumin, turmeric, and chili powder to make a thick gravy.',
+          '🥣 Step 4: Place egg halves face-down into gravy and fry for 2 mins until golden!'
+        ]
+      },
+      {
+        title: '10-Min Instant Rava Uttapam / Dosa',
+        category: 'Quick Breakfast',
+        cuisine: 'South Indian',
+        prepTime: '10 mins',
+        calories: '210 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('curd') || l.includes('onion') || l.includes('tomato') || l.includes('rice');
+        }),
+        missingIngredients: ['Rava / Semolina', 'Salt', 'Oil'],
+        instructions: [
+          '🥣 Step 1: Mix 1 cup rava with 1/2 cup curd and water into a smooth batter.',
+          '🧅 Step 2: Stir in finely chopped onions and tomatoes.',
+          '🍳 Step 3: Pour a ladle on a hot tawa with oil; cook both sides for 4 mins until crispy brown.',
+          '😋 Step 4: Serve hot 10-minute Instant Rava Uttapam!'
+        ]
+      },
+      {
+        title: '10-Min Aloo Pyaz Tawa Fry',
+        category: 'Quick Side Dish',
+        cuisine: 'North Indian',
+        prepTime: '10 mins',
+        calories: '230 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('potato') || l.includes('onion') || l.includes('turmeric');
+        }),
+        missingIngredients: ['Mustard Oil', 'Cumin Seeds', 'Amchur Powder'],
+        instructions: [
+          '🥔 Step 1: Thinly slice potatoes and onions into ribbons.',
+          '🍳 Step 2: Heat 1.5 tbsp oil in a tawa; add cumin seeds, potatoes, and onions.',
+          '🥘 Step 3: Sprinkle salt, turmeric, and chili powder; fry on medium-high flame for 7 mins.',
+          '🍽️ Step 4: Serve crispy 10-minute Aloo Pyaz Fry!'
+        ]
+      }
+    ];
+
+    // ── 3. FIFTEEN MINUTE DISHES (15 Mins) ─────────────────────────────────────
+    const fifteenMinDishes: Dish[] = [
+      {
+        title: '15-Min Quick Kadhai Paneer Subzi',
+        category: 'Main Course',
+        cuisine: 'North Indian',
+        prepTime: '15 mins',
+        calories: '340 kcal',
+        difficulty: 'Medium',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('paneer') || l.includes('capsicum') || l.includes('onion') || l.includes('tomato');
+        }),
+        missingIngredients: ['Garam Masala', 'Butter / Ghee', 'Salt'],
+        instructions: [
+          '🔪 Step 1: Dice paneer, onions, and capsicum into medium cubes.',
+          '🍳 Step 2: Heat 1 tbsp ghee in a karahi; sauté veggies for 3 mins.',
+          '🍅 Step 3: Add tomatoes, ginger-garlic paste, and spices; simmer for 5 mins.',
+          '🧀 Step 4: Add paneer cubes, cover pot, and steam for 5 mins until tender.',
+          '🍽️ Step 5: Serve hot 15-minute Kadhai Paneer!'
+        ]
+      },
+      {
+        title: '15-Min Restaurant Style Dal Tadka',
+        category: 'Main Course',
+        cuisine: 'Indian',
+        prepTime: '15 mins',
+        calories: '260 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('dal') || l.includes('toor') || l.includes('moong') || l.includes('masoor') || l.includes('ghee');
+        }),
+        missingIngredients: ['Cumin Seeds', 'Hing (Asafoetida)', 'Garlic'],
+        instructions: [
+          '🥣 Step 1: Pressure cook yellow dal with turmeric and salt for 8 mins.',
+          '🧄 Step 2: Fry cumin seeds, garlic, and red chili in 1 tbsp ghee for 2 mins.',
+          '💥 Step 3: Pour sizzling ghee tadka into cooked dal.',
+          '🌿 Step 4: Stir in cilantro and serve warm in 15 minutes!'
+        ]
+      },
+      {
+        title: '15-Min Punjabi Aloo Gobi Dry Fry',
+        category: 'Main Course',
+        cuisine: 'North Indian',
+        prepTime: '15 mins',
+        calories: '250 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('potato') || l.includes('cauliflower') || l.includes('gobi') || l.includes('onion');
+        }),
+        missingIngredients: ['Turmeric', 'Amchur Powder', 'Garam Masala'],
+        instructions: [
+          '🥔 Step 1: Cut potatoes and cauliflower into small bite-sized florets.',
+          '🍳 Step 2: Sauté in 1 tbsp oil for 5 mins until light golden.',
+          '🧅 Step 3: Add onions, ginger, turmeric, and chili powder; cover and steam on low for 8 mins.',
+          '🍋 Step 4: Squeeze lemon juice and serve hot 15-minute Aloo Gobi!'
+        ]
+      },
+      {
+        title: '15-Min Comfort Moong Dal Khichdi',
+        category: 'Comfort Meal',
+        cuisine: 'Indian',
+        prepTime: '15 mins',
+        calories: '280 kcal',
+        difficulty: 'Easy',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('rice') || l.includes('dal') || l.includes('ghee') || l.includes('turmeric');
+        }),
+        missingIngredients: ['Ghee', 'Cumin Seeds', 'Hing'],
+        instructions: [
+          '🍚 Step 1: Wash rice and moong dal together.',
+          '🍳 Step 2: Sauté cumin seeds, ginger, and turmeric in ghee inside a cooker for 2 mins.',
+          '🍲 Step 3: Add rice, dal, and 3 cups water; pressure cook for 10 mins.',
+          '🥣 Step 4: Serve hot comforting 15-minute Khichdi with ghee!'
+        ]
+      }
+    ];
+
+    // ── 4. THIRTY MINUTE DISHES (30 Mins) ──────────────────────────────────────
+    const thirtyMinDishes: Dish[] = [
+      {
+        title: '30-Min Authentic Hyderabadi Dum Biryani',
+        category: 'Main Course',
+        cuisine: 'South Indian',
+        prepTime: '30 mins',
+        calories: '420 kcal',
+        difficulty: 'Medium',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('rice') || l.includes('basmati') || l.includes('onion') || l.includes('potato') || l.includes('chicken');
+        }),
+        missingIngredients: ['Biryani Masala', 'Saffron', 'Mint Leaves'],
+        instructions: [
+          '🍚 Step 1: Boil Basmati rice with whole spices until 80% cooked (8 mins).',
+          '🥕 Step 2: Sauté mixed veggies/meat, fried onions, mint, and biryani masala in ghee (10 mins).',
+          '🍲 Step 3: Layer rice over masala gravy, seal pot tightly, and dum cook on low flame for 12 mins.',
+          '🥣 Step 4: Mix gently and serve hot 30-minute Dum Biryani with Raita!'
+        ]
+      },
+      {
+        title: '30-Min Shahi Paneer Butter Masala',
+        category: 'Main Course',
+        cuisine: 'North Indian',
+        prepTime: '30 mins',
+        calories: '410 kcal',
+        difficulty: 'Medium',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('paneer') || l.includes('tomato') || l.includes('onion') || l.includes('butter') || l.includes('cream');
+        }),
+        missingIngredients: ['Kasuri Methi', 'Cashews', 'Fresh Cream'],
+        instructions: [
+          '🧅 Step 1: Blend tomatoes, onions, garlic, and cashews into a rich smooth puree (5 mins).',
+          '🧈 Step 2: Cook puree in butter and ghee for 12 mins until oil separates.',
+          '🧀 Step 3: Add paneer cubes, cream, kasuri methi, and simmer gently for 8 mins.',
+          '🍽️ Step 4: Serve rich 30-minute Shahi Paneer with Naan!'
+        ]
+      },
+      {
+        title: '30-Min Desi Homestyle Chicken Curry',
+        category: 'Main Course',
+        cuisine: 'Indian',
+        prepTime: '30 mins',
+        calories: '450 kcal',
+        difficulty: 'Medium',
+        usedIngredients: selected.filter(i => {
+          const l = i.toLowerCase();
+          return l.includes('chicken') || l.includes('onion') || l.includes('tomato') || l.includes('garlic');
+        }),
+        missingIngredients: ['Garam Masala', 'Turmeric', 'Mustard Oil'],
+        instructions: [
+          '🍗 Step 1: Marinate chicken in yogurt, turmeric, and salt for 5 mins.',
+          '🧅 Step 2: Sauté sliced onions and ginger-garlic paste until golden brown (8 mins).',
+          '🍲 Step 3: Add chicken and tomatoes, cover pot, and simmer on low heat for 17 mins.',
+          '🌿 Step 4: Serve delicious hot 30-minute Chicken Curry with Rice!'
+        ]
+      }
+    ];
+
+    // Select exact dishes based on user's maxTime selection
+    let resultDishes: Dish[] = [];
+    if (timeLimit === '5') {
+      resultDishes = fiveMinDishes;
+    } else if (timeLimit === '10') {
+      resultDishes = tenMinDishes;
+    } else if (timeLimit === '15') {
+      resultDishes = fifteenMinDishes;
+    } else if (timeLimit === '30') {
+      resultDishes = thirtyMinDishes;
+    } else {
+      // 'all' -> return a balanced mixture of all times
+      resultDishes = [
+        fiveMinDishes[0],
+        tenMinDishes[0],
+        fifteenMinDishes[0],
+        thirtyMinDishes[0],
+        fiveMinDishes[1]
+      ];
+    }
+
+    setResult({
+      status: 'success',
+      dishes: resultDishes
+    });
   };
 
   const handleBuyIngredient = (item: string) => {
@@ -299,20 +631,203 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
     Linking.openURL(url).catch(() => { });
   };
 
-  const dish = result?.dishes?.[selectedDish];
+  const activeDish = result?.dishes?.[selectedDish];
 
+  // ── DEDICATED RECIPE RESULTS SCREEN VIEW ────────────────────────────────────
+  if (viewMode === 'recipes') {
+    return (
+      <View style={styles.container}>
+        {/* ── HEADER ── */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => setViewMode('selection')} 
+            style={styles.backBtn} 
+            activeOpacity={0.8}
+          >
+            <Text style={styles.backBtnText}>← Back to Ingredients</Text>
+          </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerBadge}>🍲 INDIAN RECIPES</Text>
+            <Text style={styles.headerTitle}>
+              {result?.dishes ? `${result.dishes.length} Recipes Found` : 'Kid-Friendly Recipes'}
+            </Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.langToggleBtn}
+            onPress={() => setLanguage(l => l === 'English' ? 'Telugu' : 'English')}
+          >
+            <Text style={styles.langToggleText}>{language === 'English' ? '🇬🇧 EN' : '🇮🇳 TE'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          {/* KID & BEGINNER FRIENDLY GUIDANCE BANNER */}
+          <View style={styles.kidFriendlyBanner}>
+            <Text style={styles.kidFriendlyEmoji}>🧒</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.kidFriendlyTitle}>Super Easy & Kid-Friendly Cooking Guide</Text>
+              <Text style={styles.kidFriendlySub}>
+                Simple 1-2-3 step instructions designed for children and beginners to follow safely!
+              </Text>
+            </View>
+          </View>
+
+          {/* LOADING SPINNER */}
+          {isLoading && (
+            <View style={styles.loadingBox}>
+              <ActivityIndicator size="large" color="#16A34A" />
+              <Text style={styles.loadingTitle}>Preparing Child-Friendly Indian Recipes...</Text>
+              <Text style={styles.loadingSub}>
+                Matching your selected kitchen ingredients to simple, delicious step-by-step recipes...
+              </Text>
+            </View>
+          )}
+
+          {/* DISH RESULTS CONTENT */}
+          {result && result.dishes && result.dishes.length > 0 && !isLoading && (
+            <View style={styles.resultsContainer}>
+              {/* COOKING TIME FILTER ON RECIPES PAGE */}
+              <View style={styles.recipeTimeFilterRow}>
+                <Text style={styles.recipeTimeFilterLabel}>⏱️ Cooking Time Filter:</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timePillsScroll}>
+                  {[
+                    { id: 'all', label: 'All Times' },
+                    { id: '5', label: '⚡ 5 Mins' },
+                    { id: '10', label: '⏱️ 10 Mins' },
+                    { id: '15', label: '⏰ 15 Mins' },
+                    { id: '30', label: '🍲 30 Mins' },
+                  ].map((t) => (
+                    <TouchableOpacity
+                      key={t.id}
+                      style={[styles.timeFilterPill, maxTime === t.id && styles.timeFilterPillActive]}
+                      activeOpacity={0.75}
+                      onPress={() => {
+                        setMaxTime(t.id as any);
+                        generateFallbackRecipes(ingredients, t.id);
+                      }}
+                    >
+                      <Text style={[styles.timeFilterPillText, maxTime === t.id && styles.timeFilterPillTextActive]}>
+                        {t.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+
+              {/* Horizontal dish selector tabs */}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dishTabsRow}>
+                {result.dishes.map((d, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.dishTab, selectedDish === index && styles.dishTabActive]}
+                    onPress={() => setSelectedDish(index)}
+                  >
+                    <Text style={[styles.dishTabText, selectedDish === index && styles.dishTabTextActive]}>
+                      {d.title} ({d.prepTime})
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              {/* Active Dish Detail Card */}
+              {activeDish && (
+                <View style={styles.dishCard}>
+                  <View style={styles.dishCardHeader}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.dishCategoryTag}>{activeDish.category.toUpperCase()} • {activeDish.cuisine}</Text>
+                      <Text style={styles.dishTitle}>{activeDish.title}</Text>
+                    </View>
+                    <View style={styles.dishTimeBadge}>
+                      <Text style={styles.dishTimeText}>⏱️ {activeDish.prepTime}</Text>
+                    </View>
+                  </View>
+
+                  {/* Used vs Missing Ingredients */}
+                  <View style={styles.ingredientsSummaryBox}>
+                    <Text style={styles.summaryBoxTitle}>✅ Ingredients Used from Your Kitchen:</Text>
+                    <View style={styles.usedItemsWrap}>
+                      {activeDish.usedIngredients.map((u, i) => (
+                        <View key={i} style={styles.usedItemChip}>
+                          <Text style={styles.usedItemChipText}>✓ {u}</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    {activeDish.missingIngredients && activeDish.missingIngredients.length > 0 && (
+                      <>
+                        <Text style={[styles.summaryBoxTitle, { marginTop: 12, color: '#D97706' }]}>
+                          🛒 Extra Pantry Staples needed:
+                        </Text>
+                        <View style={styles.missingItemsWrap}>
+                          {activeDish.missingIngredients.map((m, i) => (
+                            <TouchableOpacity
+                              key={i}
+                              style={styles.missingItemChip}
+                              onPress={() => handleBuyIngredient(m)}
+                            >
+                              <Text style={styles.missingItemChipText}>+ {m} (Buy)</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </>
+                    )}
+                  </View>
+
+                  {/* Step-by-Step Cooking Instructions for Kids & Beginners */}
+                  <Text style={styles.instructionsHeading}>👨‍🍳 Easy Step-by-Step Cooking Guide:</Text>
+                  {activeDish.instructions.map((step, idx) => (
+                    <View key={idx} style={styles.kidStepCard}>
+                      <View style={styles.kidStepNumberBadge}>
+                        <Text style={styles.kidStepNumberText}>{idx + 1}</Text>
+                      </View>
+                      <Text style={styles.kidStepText}>{step}</Text>
+                    </View>
+                  ))}
+
+                  {/* Bottom Safety Reminder */}
+                  <View style={styles.safetyReminderBox}>
+                    <Text style={styles.safetyReminderText}>
+                      ⚠️ Safety Tip for Kids: Always ask an adult to help when using sharp knives or hot stoves!
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Action button to select different ingredients */}
+              <TouchableOpacity
+                style={styles.changeIngredientsBtn}
+                activeOpacity={0.85}
+                onPress={() => setViewMode('selection')}
+              >
+                <Text style={styles.changeIngredientsBtnText}>
+                  ← Select Different Ingredients
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  // ── INGREDIENT SELECTION SCREEN VIEW ───────────────────────────────────────
   return (
     <View style={styles.container}>
       {/* ── HEADER ── */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn} activeOpacity={0.8}>
           <Text style={styles.backBtnText}>← Back</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.headerBadge}>🍳 SMART CHEF AI</Text>
-          <Text style={styles.headerTitle}>What's in Your Kitchen?</Text>
+          <Text style={styles.headerBadge}>🛒 KITCHEN INVENTORY</Text>
+          <Text style={styles.headerTitle}>Select Your Ingredients</Text>
         </View>
-        <View style={{ width: 60 }} />
+        <TouchableOpacity 
+          style={styles.langToggleBtn}
+          onPress={() => setLanguage(l => l === 'English' ? 'Telugu' : 'English')}
+        >
+          <Text style={styles.langToggleText}>{language === 'English' ? '🇬🇧 EN' : '🇮🇳 TE'}</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -320,875 +835,1061 @@ export default function ScannerScreen({ onBack }: { onBack: () => void }) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-
-        {/* ── 📸 GOOGLE LENS AI VISION SCANNER HERO CARD ── */}
-        <View style={styles.fridgeCard}>
-          <View style={styles.fridgeTopRow}>
-            <View style={styles.fridgeBadge}>
-              <Text style={styles.fridgeBadgeText}>⚡ AI INGREDIENT PHOTO VISION</Text>
-            </View>
-            <Text style={styles.fridgeIcon}>🎯</Text>
-          </View>
-
-          <Text style={styles.fridgeTitle}>Scan Your Ingredients Photo</Text>
-          <Text style={styles.fridgeSub}>
-            Place all your available ingredients together in one spot (table, countertop, or plate) and snap a photo. Our AI vision detects every item and suggests recipes instantly!
+        {/* ── FEATURE 1: SMART SEARCH BAR WITH AUTO-COMPLETE ── */}
+        <View style={styles.searchSectionCard}>
+          <Text style={styles.searchCardTitle}>⚡ Smart Auto-Complete Search</Text>
+          <Text style={styles.searchCardSub}>
+            Type what you have in your kitchen. As you type "pa", suggestions like Paneer, Pasta, or Paprika appear instantly!
           </Text>
 
-          {/* AI Camera Viewfinder Box */}
-          <View style={styles.lensViewfinderBox}>
-            {fridgePhotoUri ? (
-              <View style={styles.previewImageContainer}>
-                <Image source={{ uri: fridgePhotoUri }} style={styles.viewfinderImage} resizeMode="contain" />
-
-                {/* HUD Bounding Corner Overlays */}
-                <View style={[styles.hudCorner, styles.hudTopLeft]} />
-                <View style={[styles.hudCorner, styles.hudTopRight]} />
-                <View style={[styles.hudCorner, styles.hudBottomLeft]} />
-                <View style={[styles.hudCorner, styles.hudBottomRight]} />
-
-                {/* Object Bounding Boxes & Tags Overlay — points directly to food items in photo */}
-                {detectedObjects.length > 0 ? (
-                  detectedObjects.map((obj: any, idx: number) => {
-                    let top = 15 + (idx * 16) % 65;
-                    let left = 15 + (idx * 22) % 60;
-                    let width = 24;
-                    let height = 20;
-
-                    if (obj.boundingBox && Array.isArray(obj.boundingBox) && obj.boundingBox.length >= 2) {
-                      const p1 = obj.boundingBox[0];
-                      const p2 = obj.boundingBox[1];
-                      left = (p1.x || 0) * 100;
-                      top = (p1.y || 0) * 100;
-                      width = Math.max(15, ((p2.x || 0) - (p1.x || 0)) * 100);
-                      height = Math.max(12, ((p2.y || 0) - (p1.y || 0)) * 100);
-                    } else if (obj.box && typeof obj.box === 'object') {
-                      top = obj.box.top || top;
-                      left = obj.box.left || left;
-                      width = obj.box.width || width;
-                      height = obj.box.height || height;
-                    }
-
-                    const confidenceScore = obj.confidence || obj.score;
-
-                    return (
-                      <View
-                        key={idx}
-                        style={[
-                          styles.boundingBoxOverlay,
-                          {
-                            top: `${Math.max(2, Math.min(80, top))}%`,
-                            left: `${Math.max(2, Math.min(75, left))}%`,
-                            width: `${Math.max(14, Math.min(40, width))}%`,
-                            height: `${Math.max(10, Math.min(35, height))}%`,
-                          }
-                        ]}
-                      >
-                        <View style={styles.boundingBoxTagPill}>
-                          <Text style={styles.boundingBoxTagText}>
-                            {getIngredientEmoji(obj.name)} {obj.name} {confidenceScore ? `${Math.round(confidenceScore * 100)}%` : ''}
-                          </Text>
-                        </View>
-                      </View>
-                    );
-                  })
-                ) : (
-                  ingredients.length > 0 && (
-                    <View style={styles.overlayTagsContainer}>
-                      {ingredients.map((item, idx) => (
-                        <View key={idx} style={styles.overlayTagPill}>
-                          <Text style={styles.overlayTagText}>{getIngredientEmoji(item)} {item}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  )
-                )}
-
-                <TouchableOpacity
-                  style={styles.retakeOverlayBtn}
-                  onPress={() => { setFridgePhotoUri(null); setIngredients([]); setResult(null); setFridgeScanMessage(null); }}
-                >
-                  <Text style={styles.retakeOverlayText}>✕ Retake Photo</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View style={styles.emptyViewfinderContent}>
-                <View style={styles.laserScanLine} />
-                <Text style={styles.hudIconText}>📷</Text>
-                <Text style={styles.hudTitleText}>AI Lens Viewfinder Ready</Text>
-                <Text style={styles.hudSubText}>Lay out all your ingredients together in frame</Text>
-              </View>
-            )}
-
-            {isScanningFridge && (
-              <View style={styles.scanningOverlay}>
-                <ActivityIndicator color="#22C55E" size="large" />
-                <Text style={styles.scanningStatusText}>
-                  {fridgeScanMessage || '🔍 AI Lens Scanning Ingredient Pixels...'}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Photo Upload / Camera Shutter Row */}
-          <View style={styles.fridgeBtnRow}>
-            <TouchableOpacity style={styles.scanCameraBtn} onPress={takeLiveFridgePhoto}>
-              <Text style={styles.scanCameraBtnText}>📸 SNAP INGREDIENTS</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.uploadGalleryBtn} onPress={pickFridgeGalleryPhoto}>
-              <Text style={styles.uploadGalleryBtnText}>🖼️ GALLERY</Text>
-            </TouchableOpacity>
-          </View>
-
-          {fridgeScanMessage && !isScanningFridge && (
-            <View style={styles.fridgeSuccessBadge}>
-              <Text style={styles.fridgeSuccessText}>
-                {ingredients.length > 0
-                  ? (language === 'Telugu'
-                    ? `✅ ఫ్రిజ్ ఫోటోలో ${ingredients.length} పదార్థాలను AI గుర్తించింది!`
-                    : `✅ AI Vision Detected ${ingredients.length} Items in Your Fridge Photo!`)
-                  : fridgeScanMessage}
-              </Text>
-            </View>
-          )}
-
-          {/* Trigger Dish Suggestions Button */}
-          {ingredients.length > 0 && !isLoading && (
-            <TouchableOpacity style={styles.generateFridgeDishesBtn} onPress={findRecipes}>
-              <Text style={styles.generateFridgeDishesBtnText}>
-                ✨ {language === 'Telugu' ? 'ఈ పదార్థాలతో వంటకాలు చూపు' : 'Show Dishes We Can Prepare'} ({ingredients.length} ITEMS)
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* ── HERO PROMPT CARD ── */}
-        <View style={styles.heroCard}>
-          <Text style={styles.heroEmoji}>🥦</Text>
-          <Text style={styles.heroTitle}>Type your available ingredients</Text>
-          <Text style={styles.heroSub}>
-            The AI will suggest dishes you can cook,{'\n'}step-by-step instructions, and missing items.
-          </Text>
-        </View>
-
-        {/* ── INGREDIENT INPUT ── */}
-        <View style={styles.inputCard}>
-          <Text style={styles.inputLabel}>Add Ingredients</Text>
-          <View style={styles.inputRow}>
+          <View style={styles.searchInputWrapper}>
+            <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
               ref={inputRef}
-              style={styles.textInput}
-              placeholder="e.g. tomato, onion, egg..."
+              style={styles.searchInput}
+              placeholder="Type ingredient (e.g. paneer, pasta, paprika)..."
               placeholderTextColor="#94A3B8"
               value={inputText}
               onChangeText={setInputText}
-              onSubmitEditing={addIngredient}
+              onSubmitEditing={() => {
+                if (inputText.trim()) {
+                  addIngredientByName(inputText);
+                }
+              }}
               returnKeyType="done"
-              blurOnSubmit={false}
             />
-            <TouchableOpacity style={styles.addBtn} onPress={addIngredient}>
-              <Text style={styles.addBtnText}>+ Add</Text>
-            </TouchableOpacity>
+            {inputText.length > 0 && (
+              <TouchableOpacity onPress={() => setInputText('')} style={styles.clearSearchInputBtn}>
+                <Text style={styles.clearSearchInputText}>✕</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Text style={styles.inputHint}>
-            💡 Tip: Separate multiple items with commas — "rice, tomato, egg"
-          </Text>
+
+          {/* AUTO-COMPLETE INSTANT SUGGESTIONS DROPDOWN */}
+          {autocompleteSuggestions.length > 0 && (
+            <View style={styles.suggestionsContainer}>
+              <Text style={styles.suggestionsHeader}>INSTANT MATCHES (TAP TO ADD):</Text>
+              <View style={styles.suggestionsGrid}>
+                {autocompleteSuggestions.map((sug, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={styles.suggestionPill}
+                    activeOpacity={0.7}
+                    onPress={() => addIngredientByName(sug)}
+                  >
+                    <Text style={styles.suggestionPillEmoji}>{getIngredientEmoji(sug)}</Text>
+                    <Text style={styles.suggestionPillText}>{sug}</Text>
+                    <Text style={styles.suggestionAddPlus}>+ Add</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* COOKING TIME LIMIT FILTER BAR */}
+          <View style={styles.timeFilterSection}>
+            <Text style={styles.timeFilterHeading}>⏱️ MAX COOKING TIME LIMIT:</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.timePillsScroll}>
+              {[
+                { id: 'all', label: 'All Times' },
+                { id: '5', label: '⚡ 5 Mins (Ultra-Fast)' },
+                { id: '10', label: '⏱️ 10 Mins (Quick)' },
+                { id: '15', label: '⏰ 15 Mins (Fast)' },
+                { id: '30', label: '🍲 30 Mins (Full Meal)' },
+              ].map((t) => (
+                <TouchableOpacity
+                  key={t.id}
+                  style={[styles.timeFilterPill, maxTime === t.id && styles.timeFilterPillActive]}
+                  activeOpacity={0.75}
+                  onPress={() => setMaxTime(t.id as any)}
+                >
+                  <Text style={[styles.timeFilterPillText, maxTime === t.id && styles.timeFilterPillTextActive]}>
+                    {t.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
 
-        {/* ── INGREDIENT TAGS ── */}
+        {/* ── ACTIVE GREEN TAG CHIPS CONTAINER (Only renders when ingredients are selected) ── */}
         {ingredients.length > 0 && (
-          <View style={styles.tagsCard}>
-            <View style={styles.tagsHeader}>
-              <Text style={styles.tagsLabel}>
-                🛒 Your Ingredients ({ingredients.length})
-              </Text>
-              <TouchableOpacity onPress={clearAll}>
-                <Text style={styles.clearText}>Clear All</Text>
+          <View style={styles.chipsCard}>
+            <View style={styles.chipsHeaderRow}>
+              <View style={styles.chipsTitleBadge}>
+                <Text style={styles.chipsTitleBadgeText}>
+                  SELECTED INGREDIENTS ({ingredients.length})
+                </Text>
+              </View>
+
+              <TouchableOpacity onPress={clearAll} activeOpacity={0.7}>
+                <Text style={styles.clearAllBtnText}>Clear All ✕</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.tagsWrap}>
-              {ingredients.map((item, idx) => (
-                <View key={idx} style={styles.tag}>
-                  <Text style={styles.tagText}>{item}</Text>
-                  <TouchableOpacity onPress={() => removeIngredient(idx)} style={styles.tagRemove}>
-                    <Text style={styles.tagRemoveText}>✕</Text>
+
+            <View style={styles.chipsWrapGrid}>
+              {ingredients.map((item, index) => (
+                <View key={index} style={styles.greenTagChip}>
+                  <Text style={styles.greenTagEmoji}>{getIngredientEmoji(item)}</Text>
+                  <Text style={styles.greenTagText}>{item}</Text>
+                  <TouchableOpacity
+                    onPress={() => removeIngredient(index)}
+                    style={styles.greenTagRemoveBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text style={styles.greenTagRemoveText}>✕</Text>
                   </TouchableOpacity>
                 </View>
               ))}
             </View>
-          </View>
-        )}
 
-        {/* ── LANGUAGE & FIND BUTTON ── */}
-        {ingredients.length > 0 && (
-          <View style={styles.controlsRow}>
-            {/* Language toggle */}
-            <View style={styles.langToggle}>
-              {(['English', 'Telugu'] as const).map(lang => (
-                <TouchableOpacity
-                  key={lang}
-                  style={[styles.langPill, language === lang && styles.langPillActive]}
-                  onPress={() => setLanguage(lang)}
-                >
-                  <Text style={[styles.langPillText, language === lang && styles.langPillTextActive]}>
-                    {lang === 'Telugu' ? 'తెలుగు' : 'English'}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Find Recipes */}
+            {/* MAIN CTA BUTTON TO FIND RECIPES */}
             <TouchableOpacity
-              style={[styles.findBtn, isLoading && { opacity: 0.6 }]}
-              onPress={findRecipes}
-              disabled={isLoading}
+              style={styles.findRecipesBtn}
               activeOpacity={0.85}
+              onPress={findRecipes}
             >
-              {isLoading ? (
-                <ActivityIndicator color="#FFF" size="small" />
-              ) : (
-                <Text style={styles.findBtnText}>🔍 Find Recipes</Text>
-              )}
+              <Text style={styles.findRecipesBtnText}>
+                ✨ Find Recipes with {ingredients.length} Selected Item{ingredients.length > 1 ? 's' : ''}
+              </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* ── ERROR STATE ── */}
-        {result?.status === 'error' && (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorIcon}>⚠️</Text>
-            <Text style={styles.errorText}>{result.message}</Text>
+        {/* ── FEATURE 2: MULTI-SELECT GROCERY CHECKLIST (MOST POPULAR) ── */}
+        <View style={styles.checklistSection}>
+          <View style={styles.checklistSectionHeader}>
+            <View>
+              <Text style={styles.checklistSectionTitle}>📋 Multi-Select Grocery Checklist</Text>
+              <Text style={styles.checklistSectionSub}>
+                100% accurate & fast. Grouped by categories — tap items to check what's in your kitchen!
+              </Text>
+            </View>
+            <View style={styles.popularBadge}>
+              <Text style={styles.popularBadgeText}>🔥 MOST POPULAR</Text>
+            </View>
           </View>
-        )}
 
-        {/* ── RECIPE RESULTS ── */}
-        {result?.status === 'success' && result.dishes.length > 0 && (
-          <>
-            {/* Dish selector tabs */}
-            <Text style={styles.sectionHeading}>🍲 Recipes You Can Make</Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.dishTabsScroll}
-            >
-              {result.dishes.map((d, idx) => (
+          {CATEGORIZED_INGREDIENTS.map((catGroup, catIdx) => {
+            const isCollapsed = !!collapsedCategories[catGroup.category];
+            const categorySelectedCount = catGroup.items.filter(it => 
+              ingredients.some(sel => sel.toLowerCase() === it.toLowerCase())
+            ).length;
+
+            return (
+              <View key={catIdx} style={styles.categoryCard}>
                 <TouchableOpacity
-                  key={idx}
-                  style={[styles.dishTab, selectedDish === idx && styles.dishTabActive]}
-                  onPress={() => { setSelectedDish(idx); setExpandedMissing(null); }}
+                  style={styles.categoryCardHeader}
+                  activeOpacity={0.8}
+                  onPress={() => toggleCategoryCollapse(catGroup.category)}
                 >
-                  <Text style={[styles.dishTabName, selectedDish === idx && styles.dishTabNameActive]}>
-                    {idx === 0 ? '⭐ ' : ''}{d.title}
-                  </Text>
-                  <View style={styles.dishTabMeta}>
-                    <Text style={[styles.dishTabTime, selectedDish === idx && styles.dishTabTimeActive]}>
-                      ⏱ {d.prepTime}
-                    </Text>
-                    {d.missingIngredients.length > 0 && (
-                      <View style={styles.missingBadge}>
-                        <Text style={styles.missingBadgeText}>
-                          {d.missingIngredients.length} missing
-                        </Text>
+                  <View style={styles.categoryTitleRow}>
+                    <Text style={styles.categoryIcon}>{catGroup.icon}</Text>
+                    <Text style={styles.categoryName}>{catGroup.category}</Text>
+                    {categorySelectedCount > 0 && (
+                      <View style={styles.categoryCountBadge}>
+                        <Text style={styles.categoryCountText}>{categorySelectedCount} selected</Text>
                       </View>
                     )}
                   </View>
+                  <Text style={styles.collapseArrowText}>{isCollapsed ? '▼' : '▲'}</Text>
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
 
-            {/* ── ACTIVE DISH DETAIL ── */}
-            {dish && (
-              <View style={styles.dishCard}>
-                {/* Dish Header */}
-                <View style={styles.dishHeaderRow}>
-                  <Text style={styles.dishName}>{dish.title}</Text>
-                  <View style={styles.cuisinePill}>
-                    <Text style={styles.cuisinePillText}>{dish.cuisine}</Text>
-                  </View>
-                </View>
-                <Text style={styles.dishMeta}>{dish.category} · {dish.prepTime}</Text>
-
-                {/* You Have */}
-                {dish.usedIngredients.length > 0 && (
-                  <View style={styles.ingredientsSection}>
-                    <Text style={styles.ingredientsSectionLabel}>✅ Ingredients You Have:</Text>
-                    <View style={styles.ingredientsWrap}>
-                      {dish.usedIngredients.map((item, i) => (
-                        <View key={i} style={styles.haveTag}>
-                          <Text style={styles.haveTagText}>✓ {item}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                {/* Missing Ingredients */}
-                {dish.missingIngredients.length > 0 && (
-                  <View style={styles.missingSection}>
-                    <Text style={styles.missingSectionLabel}>
-                      ⚠️ Missing Ingredients ({dish.missingIngredients.length}):
-                    </Text>
-                    <View style={styles.missingWrap}>
-                      {dish.missingIngredients.map((item, i) => (
-                        <View key={i} style={styles.missingItemRow}>
-                          <View style={styles.missingTag}>
-                            <Text style={styles.missingTagText}>✗ {item}</Text>
+                {!isCollapsed && (
+                  <View style={styles.categoryGrid}>
+                    {catGroup.items.map((item, itemIdx) => {
+                      const isChecked = ingredients.some(i => i.toLowerCase() === item.toLowerCase());
+                      return (
+                        <TouchableOpacity
+                          key={itemIdx}
+                          style={[
+                            styles.checkboxItemPill,
+                            isChecked && styles.checkboxItemPillActive
+                          ]}
+                          activeOpacity={0.7}
+                          onPress={() => toggleChecklistItem(item)}
+                        >
+                          <View style={[styles.checkboxBox, isChecked && styles.checkboxBoxActive]}>
+                            {isChecked && <Text style={styles.checkmarkIcon}>✓</Text>}
                           </View>
-                          <TouchableOpacity
-                            style={styles.buyBtn}
-                            onPress={() => handleBuyIngredient(item)}
-                          >
-                            <Text style={styles.buyBtnText}>🛒 Buy</Text>
-                          </TouchableOpacity>
-                        </View>
-                      ))}
-                    </View>
-
-                    {/* Quick Order Links */}
-                    <View style={styles.quickOrderBox}>
-                      <Text style={styles.quickOrderLabel}>Order all missing items from:</Text>
-                      <View style={styles.quickOrderRow}>
-                        {['blinkit', 'zepto', 'bigbasket', 'instamart'].map(store => (
-                          <TouchableOpacity
-                            key={store}
-                            style={styles.storePill}
-                            onPress={() => {
-                              const q = encodeURIComponent(dish.missingIngredients[0] || '');
-                              const urls: Record<string, string> = {
-                                blinkit: `https://blinkit.com/s/?q=${q}`,
-                                zepto: `https://www.zeptonow.com/search?query=${q}`,
-                                bigbasket: `https://www.bigbasket.com/ps/?q=${q}`,
-                                instamart: `https://www.swiggy.com/instamart/search?query=${q}`,
-                              };
-                              Linking.openURL(urls[store]).catch(() => { });
-                            }}
-                          >
-                            <Text style={styles.storePillText}>{store.toUpperCase()}</Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
+                          <Text style={[styles.checkboxItemText, isChecked && styles.checkboxItemTextActive]}>
+                            {item}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 )}
-
-                {/* Steps */}
-                <Text style={styles.stepsHeading}>
-                  {language === 'Telugu' ? '👨‍🍳 తయారీ విధానం:' : '👨‍🍳 How to Cook:'}
-                </Text>
-                {dish.instructions.map((step, i) => (
-                  <View key={i} style={styles.stepRow}>
-                    <View style={styles.stepNum}>
-                      <Text style={styles.stepNumText}>{i + 1}</Text>
-                    </View>
-                    <Text style={styles.stepText}>{step}</Text>
-                  </View>
-                ))}
               </View>
-            )}
-          </>
-        )}
-
-        {/* ── EMPTY STATE (no ingredients yet) ── */}
-        {ingredients.length === 0 && !result && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🥕🧅🍅</Text>
-            <Text style={styles.emptyTitle}>No ingredients added yet</Text>
-            <Text style={styles.emptySub}>
-              Start typing what you have in your kitchen above,{'\n'}
-              and we'll tell you exactly what you can cook!
-            </Text>
-            <View style={styles.exampleChips}>
-              {['Tomato', 'Onion', 'Egg', 'Rice', 'Potato', 'Paneer', 'Chicken'].map(ex => (
-                <TouchableOpacity
-                  key={ex}
-                  style={styles.exampleChip}
-                  onPress={() => {
-                    if (!ingredients.map(i => i.toLowerCase()).includes(ex.toLowerCase())) {
-                      setIngredients(prev => [...prev, ex]);
-                    }
-                  }}
-                >
-                  <Text style={styles.exampleChipText}>+ {ex}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        )}
-
+            );
+          })}
+        </View>
       </ScrollView>
+
+      {/* ── STICKY BOTTOM FLOATING SELECTED ITEMS BAR ── */}
+      {ingredients.length > 0 && (
+        <View style={styles.floatingStickyBar}>
+          <View style={styles.floatingHeaderRow}>
+            <View style={styles.floatingTitleBadge}>
+              <Text style={styles.floatingTitleBadgeText}>
+                🛒 SELECTED INGREDIENTS ({ingredients.length})
+              </Text>
+            </View>
+            <TouchableOpacity onPress={clearAll} activeOpacity={0.7} style={styles.floatingClearBtn}>
+              <Text style={styles.floatingClearText}>Clear All ✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.floatingChipsScroll}>
+            {ingredients.map((item, index) => (
+              <View key={index} style={styles.floatingChipPill}>
+                <Text style={styles.floatingChipEmoji}>{getIngredientEmoji(item)}</Text>
+                <Text style={styles.floatingChipText}>{item}</Text>
+                <TouchableOpacity
+                  onPress={() => removeIngredient(index)}
+                  style={styles.floatingChipRemoveBtn}
+                  hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                >
+                  <Text style={styles.floatingChipRemoveText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+
+          <TouchableOpacity
+            style={styles.floatingCtaBtn}
+            activeOpacity={0.85}
+            onPress={findRecipes}
+          >
+            <Text style={styles.floatingCtaText}>
+              ✨ Find Matching Recipes ({ingredients.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
 
-// ─── STYLES ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
-
-  // Header
-  // ⬇️ ADJUST paddingTop BELOW TO MOVE THE HEADER UP OR DOWN (for status bar / camera notch) ⬇️
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingTop: 50, // 👈 CHANGE THIS VALUE (e.g., 40, 50, 60) to adjust top spacing for mobile notch
+    paddingTop: Platform.OS === 'android' ? 44 : 20,
     paddingBottom: 16,
-    backgroundColor: '#FFF',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderColor: '#E2E8F0',
+    borderBottomColor: '#E2E8F0',
   },
   backBtn: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    borderRadius: 12,
     backgroundColor: '#F1F5F9',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
   },
-  backBtnText: { fontSize: 14, fontWeight: '600', color: '#1E293B' },
-  headerCenter: { alignItems: 'center' },
-  headerBadge: { fontSize: 9, fontWeight: '800', color: '#16A34A', letterSpacing: 1.4 },
-  headerTitle: { fontSize: 16, fontWeight: '800', color: '#0F172A', marginTop: 2 },
-
-  scrollContent: { padding: 20, paddingBottom: 60 },
-
-  // Hero Card
-  heroCard: {
-    backgroundColor: '#F0FDF4',
-    borderRadius: 20,
-    padding: 22,
+  backBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  headerCenter: {
     alignItems: 'center',
-    marginBottom: 20,
+  },
+  headerBadge: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#16A34A',
+    letterSpacing: 1,
+  },
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginTop: 2,
+  },
+  langToggleBtn: {
+    backgroundColor: '#F0FDF4',
     borderWidth: 1,
     borderColor: '#BBF7D0',
-  },
-  heroEmoji: { fontSize: 40, marginBottom: 8 },
-  heroTitle: { fontSize: 18, fontWeight: '800', color: '#14532D', textAlign: 'center', marginBottom: 6 },
-  heroSub: { fontSize: 13, color: '#166534', textAlign: 'center', lineHeight: 20 },
-
-  // Input Card
-  inputCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 18,
-    padding: 18,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  inputLabel: { fontSize: 13, fontWeight: '700', color: '#475569', marginBottom: 10 },
-  inputRow: { flexDirection: 'row', gap: 10 },
-  textInput: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    fontSize: 15,
-    color: '#1E293B',
-    backgroundColor: '#F8FAFC',
-    outlineStyle: 'none',
-  } as any,
-  addBtn: {
-    backgroundColor: '#16A34A',
-    paddingHorizontal: 18,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 48,
-  },
-  addBtnText: { color: '#FFF', fontSize: 14, fontWeight: '700' },
-  inputHint: { fontSize: 12, color: '#94A3B8', marginTop: 10 },
-
-  // Tags Card
-  tagsCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 18,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-  },
-  tagsHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  tagsLabel: { fontSize: 13, fontWeight: '700', color: '#0F172A' },
-  clearText: { fontSize: 13, color: '#EF4444', fontWeight: '600' },
-  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#6EE7B7',
-    borderRadius: 20,
-    paddingLeft: 12,
-    paddingRight: 6,
-    paddingVertical: 6,
-    gap: 4,
-  },
-  tagText: { fontSize: 13, fontWeight: '700', color: '#065F46' },
-  tagRemove: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#D1FAE5',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tagRemoveText: { fontSize: 10, color: '#065F46', fontWeight: '800' },
-
-  // Controls Row
-  controlsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 12,
-  },
-  langToggle: { flexDirection: 'row', gap: 8 },
-  langPill: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    backgroundColor: '#FFF',
-  },
-  langPillActive: { backgroundColor: '#16A34A', borderColor: '#16A34A' },
-  langPillText: { fontSize: 12, color: '#64748B', fontWeight: '600' },
-  langPillTextActive: { color: '#FFF' },
-  findBtn: {
-    flex: 1,
-    backgroundColor: '#16A34A',
-    height: 50,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#16A34A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  findBtnText: { color: '#FFF', fontSize: 15, fontWeight: '800' },
-
-  // Error
-  errorCard: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 16,
-    padding: 18,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
-    marginBottom: 16,
-    gap: 8,
-  },
-  errorIcon: { fontSize: 28 },
-  errorText: { fontSize: 14, color: '#991B1B', textAlign: 'center', lineHeight: 22, fontWeight: '500' },
-
-  // Section heading
-  sectionHeading: { fontSize: 16, fontWeight: '800', color: '#0F172A', marginBottom: 12 },
-
-  // Dish Tabs
-  dishTabsScroll: { marginBottom: 16 },
-  dishTab: {
-    backgroundColor: '#FFF',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 10,
-    minWidth: 150,
-  },
-  dishTabActive: { backgroundColor: '#16A34A', borderColor: '#16A34A' },
-  dishTabName: { fontSize: 14, fontWeight: '700', color: '#334155', marginBottom: 4 },
-  dishTabNameActive: { color: '#FFF' },
-  dishTabMeta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dishTabTime: { fontSize: 11, color: '#94A3B8' },
-  dishTabTimeActive: { color: '#D1FAE5' },
-  missingBadge: {
-    backgroundColor: '#FEF2F2',
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  missingBadgeText: { fontSize: 10, color: '#EF4444', fontWeight: '700' },
-
-  // Dish Detail Card
-  dishCard: {
-    backgroundColor: '#FFF',
-    borderRadius: 22,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  dishHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-  dishName: { fontSize: 20, fontWeight: '800', color: '#0F172A', flex: 1, marginRight: 10 },
-  cuisinePill: { backgroundColor: '#ECFDF5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
-  cuisinePillText: { fontSize: 11, fontWeight: '700', color: '#15803D' },
-  dishMeta: { fontSize: 13, color: '#64748B', marginBottom: 18 },
-
-  // Ingredients sections
-  ingredientsSection: { marginBottom: 16 },
-  ingredientsSectionLabel: { fontSize: 13, fontWeight: '700', color: '#15803D', marginBottom: 10 },
-  ingredientsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  haveTag: {
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#6EE7B7',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  haveTagText: { fontSize: 13, fontWeight: '600', color: '#065F46' },
-
-  // Missing
-  missingSection: {
-    backgroundColor: '#FFFBEB',
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
-  missingSectionLabel: { fontSize: 13, fontWeight: '700', color: '#92400E', marginBottom: 12 },
-  missingWrap: { gap: 8, marginBottom: 12 },
-  missingItemRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  missingTag: {
-    flex: 1,
-    backgroundColor: '#FEF9C3',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 12,
-    marginRight: 8,
-  },
-  missingTagText: { fontSize: 13, fontWeight: '600', color: '#92400E' },
-  buyBtn: {
-    backgroundColor: '#F59E0B',
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 10,
-  },
-  buyBtnText: { fontSize: 12, fontWeight: '700', color: '#FFF' },
-
-  quickOrderBox: {
-    borderTopWidth: 1,
-    borderTopColor: '#FDE68A',
-    paddingTop: 12,
-  },
-  quickOrderLabel: { fontSize: 12, fontWeight: '700', color: '#92400E', marginBottom: 8 },
-  quickOrderRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  storePill: {
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-  },
-  storePillText: { fontSize: 11, fontWeight: '800', color: '#B45309' },
-
-  // Steps
-  stepsHeading: { fontSize: 15, fontWeight: '800', color: '#0F172A', marginBottom: 14, marginTop: 4 },
-  stepRow: { flexDirection: 'row', marginBottom: 14, alignItems: 'flex-start' },
-  stepNum: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#16A34A',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-    marginTop: 1,
-    flexShrink: 0,
-  },
-  stepNumText: { color: '#FFF', fontSize: 13, fontWeight: '800' },
-  stepText: { flex: 1, fontSize: 14, color: '#334155', lineHeight: 22, fontWeight: '500' },
-
-  // Empty state
-  emptyState: {
-    alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 20,
     paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
-  emptyEmoji: { fontSize: 48, marginBottom: 14 },
-  emptyTitle: { fontSize: 18, fontWeight: '800', color: '#1E293B', marginBottom: 8 },
-  emptySub: { fontSize: 14, color: '#64748B', textAlign: 'center', lineHeight: 22, marginBottom: 24 },
-  exampleChips: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 },
-  exampleChip: {
-    backgroundColor: '#FFF',
-    borderWidth: 1.5,
-    borderColor: '#16A34A',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+  langToggleText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#15803D',
   },
-  exampleChipText: { fontSize: 13, fontWeight: '700', color: '#15803D' },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 180,
+  },
 
-  // ── Fridge Scanner AI Styles ──
-  fridgeCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 24,
-    padding: 20,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: '#334155',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 6,
-  },
-  fridgeTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  fridgeBadge: { backgroundColor: '#22C55E', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  fridgeBadgeText: { fontSize: 10, fontWeight: '900', color: '#0F172A', letterSpacing: 1 },
-  fridgeIcon: { fontSize: 24 },
-  fridgeTitle: { fontSize: 20, fontWeight: '900', color: '#F8FAFC', marginBottom: 6 },
-  fridgeSub: { fontSize: 13, color: '#94A3B8', lineHeight: 20, marginBottom: 18 },
-
-  // Google Lens HUD Viewfinder Box
-  lensViewfinderBox: {
-    width: '100%',
-    height: 420,
-    backgroundColor: '#090D16',
-    borderRadius: 18,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: '#334155',
-    position: 'relative',
-    marginBottom: 16,
-  },
-  previewImageContainer: {
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-  },
-  viewfinderImage: {
-    width: '100%',
-    height: '100%',
-  },
-  hudCorner: {
-    position: 'absolute',
-    width: 24,
-    height: 24,
-    borderColor: '#22C55E',
-  },
-  hudTopLeft: { top: 12, left: 12, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 6 },
-  hudTopRight: { top: 12, right: 12, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 6 },
-  hudBottomLeft: { bottom: 12, left: 12, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 6 },
-  hudBottomRight: { bottom: 12, right: 12, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 6 },
-
-  overlayTagsContainer: {
+  // ── STICKY BOTTOM FLOATING BAR STYLES ──────────────────────────────────────
+  floatingStickyBar: {
     position: 'absolute',
     bottom: 12,
     left: 12,
     right: 12,
+    backgroundColor: '#0F172A',
+    borderRadius: 22,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: '#1E293B',
+  },
+  floatingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  floatingTitleBadge: {
+    backgroundColor: 'rgba(34, 197, 94, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  floatingTitleBadgeText: {
+    color: '#4ADE80',
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  floatingClearBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  floatingClearText: {
+    color: '#EF4444',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  floatingChipsScroll: {
+    maxHeight: 38,
+    marginBottom: 10,
+  },
+  floatingChipPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#16A34A',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    marginRight: 6,
+    gap: 4,
+  },
+  floatingChipEmoji: {
+    fontSize: 12,
+  },
+  floatingChipText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  floatingChipRemoveBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 2,
+  },
+  floatingChipRemoveText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+  floatingCtaBtn: {
+    backgroundColor: '#22C55E',
+    borderRadius: 14,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  floatingCtaText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+
+  // ── SEARCH CARD STYLES ──────────────────────────────────────────────────────
+  searchSectionCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  searchCardTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 4,
+  },
+  searchCardSub: {
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  searchInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 50,
+  },
+  searchIcon: {
+    fontSize: 16,
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0F172A',
+  },
+  clearSearchInputBtn: {
+    padding: 6,
+  },
+  clearSearchInputText: {
+    fontSize: 14,
+    color: '#94A3B8',
+    fontWeight: '800',
+  },
+  suggestionsContainer: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  suggestionsHeader: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#16A34A',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  suggestionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  suggestionPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
+    gap: 6,
+  },
+  suggestionPillEmoji: {
+    fontSize: 14,
+  },
+  suggestionPillText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#166534',
+  },
+  suggestionAddPlus: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#16A34A',
+    marginLeft: 2,
+  },
+
+  // ── GREEN TAG CHIPS CONTAINER ──────────────────────────────────────────────
+  chipsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  chipsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  chipsTitleBadge: {
+    backgroundColor: '#E0F2FE',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  chipsTitleBadgeText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#0369A1',
+    letterSpacing: 0.5,
+  },
+  clearAllBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#EF4444',
+  },
+  emptyChipsBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  emptyChipsEmoji: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  emptyChipsText: {
+    fontSize: 13,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  chipsWrapGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  greenTagChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#16A34A',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  greenTagEmoji: {
+    fontSize: 14,
+  },
+  greenTagText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  greenTagRemoveBtn: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 2,
+  },
+  greenTagRemoveText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '900',
+  },
+  findRecipesBtn: {
+    backgroundColor: '#16A34A',
+    borderRadius: 16,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 4,
+    marginTop: 4,
+  },
+  findRecipesBtnText: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+
+  // ── MULTI-SELECT CHECKLIST STYLES ──────────────────────────────────────────
+  checklistSection: {
+    marginBottom: 20,
+  },
+  checklistSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+    paddingHorizontal: 2,
+  },
+  checklistSectionTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  checklistSectionSub: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+    maxWidth: 240,
+    lineHeight: 16,
+  },
+  popularBadge: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  popularBadgeText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#D97706',
+  },
+  categoryCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    overflow: 'hidden',
+  },
+  categoryCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: '#F8FAFC',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  categoryTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryIcon: {
+    fontSize: 18,
+  },
+  categoryName: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  categoryCountBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  categoryCountText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  collapseArrowText: {
+    fontSize: 12,
+    color: '#94A3B8',
+  },
+  categoryGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    padding: 12,
+    gap: 8,
+  },
+  checkboxItemPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    gap: 8,
+  },
+  checkboxItemPillActive: {
+    backgroundColor: '#DCFCE7',
+    borderColor: '#22C55E',
+  },
+  checkboxBox: {
+    width: 18,
+    height: 18,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: '#94A3B8',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxBoxActive: {
+    backgroundColor: '#16A34A',
+    borderColor: '#16A34A',
+  },
+  checkmarkIcon: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  checkboxItemText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  checkboxItemTextActive: {
+    color: '#14532D',
+    fontWeight: '800',
+  },
+
+  // ── LOADING STYLES ─────────────────────────────────────────────────────────
+  loadingBox: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    marginVertical: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  loadingTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginTop: 12,
+  },
+  loadingSub: {
+    fontSize: 12,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+
+  // ── COOKING TIME LIMIT FILTER STYLES ─────────────────────────────────────────
+  timeFilterSection: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  timeFilterHeading: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#D97706',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  timePillsScroll: {
+    flexDirection: 'row',
+  },
+  timeFilterPill: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 14,
+    marginRight: 8,
+  },
+  timeFilterPillActive: {
+    backgroundColor: '#D97706',
+    borderColor: '#D97706',
+  },
+  timeFilterPillText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  timeFilterPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  recipeTimeFilterRow: {
+    marginBottom: 14,
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 16,
+    padding: 12,
+  },
+  recipeTimeFilterLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#B45309',
+    marginBottom: 8,
+  },
+
+  // ── KID & BEGINNER FRIENDLY STYLES ──────────────────────────────────────────
+  kidFriendlyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1.5,
+    borderColor: '#86EFAC',
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 16,
+    gap: 12,
+  },
+  kidFriendlyEmoji: {
+    fontSize: 28,
+  },
+  kidFriendlyTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  kidFriendlySub: {
+    fontSize: 12,
+    color: '#166534',
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  kidStepCard: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 10,
+    gap: 12,
+  },
+  kidStepNumberBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#16A34A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  kidStepNumberText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+  },
+  kidStepText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1E293B',
+    lineHeight: 22,
+    fontWeight: '600',
+  },
+  safetyReminderBox: {
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 14,
+  },
+  safetyReminderText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B45309',
+    textAlign: 'center',
+  },
+  changeIngredientsBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    borderRadius: 16,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  changeIngredientsBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#334155',
+  },
+
+  // ── RESULTS RECIPE STYLES ───────────────────────────────────────────────────
+  resultsContainer: {
+    marginTop: 10,
+  },
+  resultsHeading: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginBottom: 12,
+  },
+  dishTabsRow: {
+    flexDirection: 'row',
+    marginBottom: 14,
+  },
+  dishTab: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+    marginRight: 8,
+  },
+  dishTabActive: {
+    backgroundColor: '#16A34A',
+    borderColor: '#16A34A',
+  },
+  dishTabText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  dishTabTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  dishCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  dishCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+  },
+  dishCategoryTag: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#16A34A',
+    letterSpacing: 0.8,
+  },
+  dishTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#0F172A',
+    marginTop: 2,
+  },
+  dishTimeBadge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  dishTimeText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#D97706',
+  },
+  ingredientsSummaryBox: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  summaryBoxTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#166534',
+    marginBottom: 8,
+  },
+  usedItemsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
   },
-  overlayTagPill: {
-    backgroundColor: 'rgba(15, 23, 42, 0.88)',
-    borderWidth: 1,
-    borderColor: '#22C55E',
+  usedItemChip: {
+    backgroundColor: '#DCFCE7',
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-  },
-  overlayTagText: {
-    color: '#4ADE80',
-    fontSize: 12,
-    fontWeight: '800',
-  },
-
-  // Object Localization Bounding Boxes
-  boundingBoxOverlay: {
-    position: 'absolute',
-    borderWidth: 2,
-    borderColor: '#22C55E',
+    paddingVertical: 4,
     borderRadius: 8,
-    backgroundColor: 'rgba(34, 197, 94, 0.12)',
-    justifyContent: 'flex-start',
+  },
+  usedItemChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#15803D',
+  },
+  missingItemsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  missingItemChip: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  missingItemChipText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B45309',
+  },
+  instructionsHeading: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 12,
+  },
+  stepRow: {
+    flexDirection: 'row',
     alignItems: 'flex-start',
-    zIndex: 10,
+    marginBottom: 12,
+    gap: 10,
   },
-  boundingBoxTagPill: {
-    backgroundColor: 'rgba(15, 23, 42, 0.92)',
-    borderWidth: 1,
-    borderColor: '#22C55E',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    marginTop: -10,
-    marginLeft: 4,
+  stepBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#16A34A',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
   },
-  boundingBoxTagText: {
-    color: '#4ADE80',
-    fontSize: 10,
+  stepBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: '900',
   },
-  retakeOverlayBtn: {
-    position: 'absolute',
-    top: 12,
-    right: 12,
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 10,
-  },
-  retakeOverlayText: { color: '#FFF', fontSize: 11, fontWeight: '800' },
-
-  emptyViewfinderContent: {
+  stepText: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+    fontSize: 14,
+    color: '#334155',
+    lineHeight: 20,
+    fontWeight: '500',
   },
-  laserScanLine: {
-    position: 'absolute',
-    top: '50%',
-    left: 20,
-    right: 20,
-    height: 2,
-    backgroundColor: '#22C55E',
-    shadowColor: '#22C55E',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
-  },
-  hudIconText: { fontSize: 36, marginBottom: 8 },
-  hudTitleText: { fontSize: 15, fontWeight: '800', color: '#F8FAFC', marginBottom: 4 },
-  hudSubText: { fontSize: 12, color: '#94A3B8', textAlign: 'center' },
-
-  scanningOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  scanningStatusText: { color: '#4ADE80', fontSize: 13, fontWeight: '800', marginTop: 12, textAlign: 'center' },
-
-  fridgeBtnRow: { flexDirection: 'row', gap: 10 },
-  scanCameraBtn: { flex: 1, backgroundColor: '#22C55E', paddingVertical: 14, paddingHorizontal: 12, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  scanCameraBtnText: { color: '#0F172A', fontSize: 13, fontWeight: '900' },
-  uploadGalleryBtn: { flex: 1, backgroundColor: '#1E293B', borderWidth: 1, borderColor: '#22C55E', paddingVertical: 14, paddingHorizontal: 12, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  uploadGalleryBtnText: { color: '#4ADE80', fontSize: 13, fontWeight: '800' },
-
-  fridgeSuccessBadge: { backgroundColor: '#166534', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginTop: 14 },
-  fridgeSuccessText: { color: '#4ADE80', fontSize: 12, fontWeight: '800', textAlign: 'center' },
-  generateFridgeDishesBtn: { backgroundColor: '#16A34A', borderRadius: 16, paddingVertical: 14, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', marginTop: 14, shadowColor: '#16A34A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 4 },
-  generateFridgeDishesBtnText: { color: '#FFF', fontSize: 14, fontWeight: '900' },
 });

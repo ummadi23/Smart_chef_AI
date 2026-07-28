@@ -843,7 +843,8 @@ function analyzeDynamicImagePayload(imageBase64, userLanguage = 'English') {
 // ─────────────────────────────────────────────────────────────────────────────
 router.post('/suggest-by-ingredients', async (req, res) => {
   try {
-    const { ingredients, language } = req.body;
+    const { ingredients, language, maxTime } = req.body;
+    const ingredientList = Array.isArray(ingredients) ? ingredients : [];
     const userLanguage = language || 'English';
     const isTelugu = userLanguage === 'Telugu';
 

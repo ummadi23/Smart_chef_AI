@@ -125,7 +125,7 @@ export default function DashboardScreen({
 
 
 
-        {/* 3. AI FRIDGE SCANNER HERO BANNER */}
+        {/* 3. KITCHEN INGREDIENTS CHECKLIST & SMART SEARCH HERO BANNER */}
         <TouchableOpacity
           style={styles.heroBanner}
           activeOpacity={0.9}
@@ -133,15 +133,15 @@ export default function DashboardScreen({
         >
           <View style={styles.heroContent}>
             <View style={styles.heroBadge}>
-              <Text style={styles.heroBadgeText}>🤖 AI INGREDIENT PHOTO VISION</Text>
+              <Text style={styles.heroBadgeText}>⚡ 100% ACCURATE & FAST</Text>
             </View>
-            <Text style={styles.heroTitle}>Snap your available ingredients</Text>
+            <Text style={styles.heroTitle}>Multi-Select Kitchen Checklist</Text>
             <Text style={styles.heroSubtitle}>
-              Place all your available ingredients together in one spot and snap a photo to get instant recipes.
+              Tap what you have in your kitchen or use smart auto-complete search to get instant recipes!
             </Text>
 
             <View style={styles.heroCtaBtn}>
-              <Text style={styles.heroCtaText}>📸 Snap Ingredients Photo</Text>
+              <Text style={styles.heroCtaText}>📋 Select Kitchen Ingredients</Text>
             </View>
           </View>
           <Text style={styles.heroBgEmoji}>🥑</Text>
