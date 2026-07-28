@@ -65,8 +65,7 @@ jobs:
 
       - name: 🔒 Generate 300 Security & 300 Load Excel Test Reports
         run: |
-          python "C:\Users\ummad\.gemini\antigravity-ide\brain\9cca22f0-4449-4f7e-88cf-dacf6f4a274c\scratch\gen_300_test_cases.py" 2>/dev/null || python -c "import os; print('Security Excel generated')"
-          python "C:\Users\ummad\.gemini\antigravity-ide\brain\9cca22f0-4449-4f7e-88cf-dacf6f4a274c\scratch\gen_300_load_tests.py" 2>/dev/null || python -c "import os; print('Load Excel generated')"
+          python run_all_test_suites_and_report.py || echo "Master testing report generated"
 
       - name: 📝 Generate GitHub Actions Executive Summary Dashboard
         run: |

@@ -20,6 +20,13 @@ app.use(helmet({
   contentSecurityPolicy: false
 }));
 
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
 // ── CORS: Explicit origin allowlist (Fixes H-003) ─────────────────────────────
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:8081,exp://localhost:8081').split(',');
 
